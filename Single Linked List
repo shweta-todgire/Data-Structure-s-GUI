@@ -1,0 +1,130 @@
+### GUI BASED ON SINGLE LINKED LIST WITH INSERTION, DELETION, TRAVERSAL OPERATIONS.
+### INSERTION OPERATION ADDS THE NEW NODE AT THE END OF THE LIST...DELETION OPERATION REMOVES THE NODE OF THE SPECIFIED INDEX NUMBER AND 
+### TRAVERSAL OPERATION RETURNS A LIST OF ALL THE NODE VALUES IN SEQUENCE.
+
+import tkinter as tk
+from tkinter import messagebox
+
+# Node class to represent an individual element in the linked list
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+# SinglyLinkedList class to manage the linked list operations
+class SinglyLinkedList:
+    def __init__(self):
+        self.head = None
+
+    # Method to insert a new node at the end of the linked list
+    def insert(self, data):
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+        else:
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = new_node
+
+    # Method to delete a node at a specified index
+    def delete(self, index):
+        if self.head is None:
+            return False
+
+        temp = self.head
+
+        if index == 0:
+            self.head = temp.next
+            temp = None
+            return True
+
+        for i in range(index - 1):
+            temp = temp.next
+            if temp is None:
+                return False
+
+        if temp.next is None:
+            return False
+
+        next = temp.next.next
+        temp.next = None
+        temp.next = next
+        return True
+
+    # Method to traverse the linked list and return a list of elements
+    def traverse(self):
+        elements = []
+        current = self.head
+        while current:
+            elements.append(current.data)
+            current = current.next
+        return elements
+
+# LinkedListGUI class to create and manage the Tkinter GUI
+class LinkedListGUI:
+    def __init__(self, root):
+        self.linked_list = SinglyLinkedList()
+
+        self.root = root
+        self.root.title("Singly Linked List GUI")
+
+        self.main_frame = tk.Frame(root, padx=80, pady=100,bg ="Grey")
+        self.main_frame.pack()
+
+        # Insert value section
+        self.insert_label = tk.Label(self.main_frame, text="Insert Value:", bg="Grey", font=("Helvetica", 16))
+        self.insert_label.grid(row=0, column=0, padx=10, pady=10)
+        self.insert_entry = tk.Entry(self.main_frame, font=("Helvetica", 16))
+        self.insert_entry.grid(row=0, column=1, padx=10, pady=10)
+        self.insert_button = tk.Button(self.main_frame, text="Insert", command=self.insert_node, bg="Dark Green", fg="white", font=("Helvetica", 16))
+        self.insert_button.grid(row=1, column=1, padx=10, pady=10)
+
+        # Delete node section
+        self.delete_label = tk.Label(self.main_frame, text="Delete Index:", bg="Grey", font=("Helvetica", 16))
+        self.delete_label.grid(row=2, column=0, padx=10, pady=10)
+        self.delete_entry = tk.Entry(self.main_frame, font=("Helvetica", 16))
+        self.delete_entry.grid(row=2, column=1, padx=10, pady=10)
+        self.delete_button = tk.Button(self.main_frame, text="Delete", command=self.delete_node, bg="Dark Red", fg="white", font=("Helvetica", 16))
+        self.delete_button.grid(row=3, column=1, padx=10, pady=10)
+
+        # Traverse list button
+        self.traverse_button = tk.Button(self.main_frame, text="Traverse", command=self.traverse_list, bg="Dark Blue", fg="white", font=("Helvetica", 16))
+        self.traverse_button.grid(row=4, columnspan=3, pady=20)
+
+        # Output label to display the contents of the linked list
+        self.output_label = tk.Label(self.main_frame, text="List Contents: []", bg="Grey", font=("Helvetica", 16))
+        self.output_label.grid(row=5, columnspan=3, pady=10)
+
+    # Method to insert a new node into the linked list
+    def insert_node(self):
+        value = self.insert_entry.get()
+        if value:
+            self.linked_list.insert(value)
+            self.insert_entry.delete(0, tk.END)
+            messagebox.showinfo("Success", f"Inserted {value}")
+        else:
+            messagebox.showwarning("Input Error", "Please enter a value")
+
+    # Method to delete a node from the linked list at the specified index
+    def delete_node(self):
+        index = self.delete_entry.get()
+        if index.isdigit():
+            success = self.linked_list.delete(int(index))
+            if success:
+                self.delete_entry.delete(0, tk.END)
+                messagebox.showinfo("Success", f"Deleted node at index {index}")
+            else:
+                messagebox.showwarning("Error", "Invalid index or list is empty")
+        else:
+            messagebox.showwarning("Input Error", "Please enter a valid index")
+
+    # Method to traverse the linked list and display the elements in the output label
+    def traverse_list(self):
+        elements = self.linked_list.traverse()
+        self.output_label.config(text=f"List Contents: {elements}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    gui = LinkedListGUI(root)
+    root.mainloop()
