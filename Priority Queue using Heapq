@@ -1,0 +1,188 @@
+### GUI BASED ON PRIORITY QUEUE USING HEAPQ USING BELOW OPERATIONS.
+### SET SIZE OPERATION SETS THE SIZE OF THE QUEUE. IT MUST BE A POSITIVE INTEGER.
+### ENQUEUE OPERATION ADDS DATA TO THE QUEUE WITH A SPECIFIED PRIORITY. PRIORITY MUST BE UNIQUE.
+### DEQUEUE LOWEST OPERATION REMOVES AND DISPLAYS THE DATA WITH THE LOWEST PRIORITY FROM THE QUEUE.
+### DEQUEUE HIGHEST OPERATION REMOVES AND DISPLAYS THE DATA WITH THE HIGHEST PRIORITY FROM THE QUEUE.
+### TRAVERSE LOWEST OPERATION DISPLAYS ALL QUEUE ELEMENTS SORTED BY PRIORITY IN ASCENDING ORDER.
+### TRAVERSE HIGHEST OPERATION DISPLAYS ALL QUEUE ELEMENTS SORTED BY PRIORITY IN DESCENDING ORDER.
+### CLEAR QUEUE OPERATION REMOVES ALL ELEMENTS FROM THE QUEUE.
+
+import tkinter as tk
+from tkinter import messagebox
+import heapq
+
+class HeapQueue:
+    def __init__(self, size=0):
+        self.queue = []
+        self.size = size 
+
+    def is_empty(self):
+        return len(self.queue) == 0
+
+    def is_full(self):
+        return len(self.queue) >= self.size
+
+    def set_size(self, size):
+        if size > 0:
+            self.size = size
+            return f"Queue size set to {size}"
+        else:
+            return "Queue size must be a positive integer."
+
+    def enqueue(self, data, priority):
+        if self.size == 0:
+            return "Please set the queue size before enqueuing data."
+
+        if data.strip():  # Check if the data is not empty or whitespace
+            if self.is_full():
+                return "Queue is full"
+            elif any(p == priority for p, d in self.queue):
+                return "Priority already exists. Please enter a unique priority."
+            else:
+                heapq.heappush(self.queue, (priority, data))
+                return f"Enqueued: {data} with priority {priority}"
+        else:
+            return "Data cannot be empty"
+
+    def dequeue_lowest(self):
+        if not self.is_empty():
+            data = heapq.heappop(self.queue)[1]  # Remove element with smallest priority
+            return f"Dequeued (Lowest Priority): {data}"
+        else:
+            return "Cannot dequeue...Queue is empty."
+
+    def dequeue_highest(self):
+        if not self.is_empty():
+            highest = max(self.queue, key=lambda x: x[0])  # Find the element with highest priority
+            self.queue.remove(highest)
+            heapq.heapify(self.queue)  # Re-heapify after removal
+            return f"Dequeued (Highest Priority): {highest[1]}"
+        else:
+            return "Cannot dequeue...Queue is empty."
+
+    def traverse_lowest(self):
+        if not self.is_empty():
+        # Sort the queue by priority in ascending order
+            sorted_queue = sorted(self.queue, key=lambda x: x[0])
+            elements = [f"{data}, Priority: {priority}" for priority, data in sorted_queue]
+            return "\n".join(elements)
+        else:
+            return "Queue is empty"
+    
+    def traverse_highest(self):
+        if not self.is_empty():
+            elements = [f"{data}, Priority: {priority}" for priority, data in sorted(self.queue, reverse=True)]
+            return "\n".join(elements)
+        else:
+            return "Queue is empty"
+
+    def clear_queue(self):
+        self.queue.clear()
+        return "Queue cleared"
+
+
+class HeapQueueGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Heap Queue GUI")
+        self.root.configure(bg="grey")
+
+        self.heap_queue = HeapQueue()
+
+        # Labels and entry widgets
+        self.title_label = tk.Label(root, text="Shweta Todgire S120", font=("Times New Roman", 18, "bold"), bg="grey", fg="white")
+        self.title_label.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
+        self.title_label = tk.Label(root, text="Heap Queue GUI", font=("Times New Roman", 20, "bold"), bg="grey", fg="black")
+        self.title_label.grid(row=1, column=0, columnspan=3, padx=10, pady=10)
+
+        self.size_label = tk.Label(root, text="Queue Size:", bg="grey", font=("Times new Roman", 15))
+        self.size_label.grid(row=2, column=0, padx=10, pady=10)
+
+        self.size_entry = tk.Entry(root, font=("Times New Roman", 15))
+        self.size_entry.grid(row=2, column=1, padx=10, pady=10)
+
+        self.set_size_button = tk.Button(root, text="Set Size", command=self.set_size, bg="orange", font=("Times New Roman", 15))
+        self.set_size_button.grid(row=2, column=2, padx=10, pady=10)
+
+        self.data_label = tk.Label(root, text="Data:", bg="grey", font=("Times New Roman", 15))
+        self.data_label.grid(row=3, column=0, padx=10, pady=10)
+
+        self.data_entry = tk.Entry(root, font=("Times New Roman", 15))
+        self.data_entry.grid(row=3, column=1, padx=10, pady=10)
+
+        self.priority_label = tk.Label(root, text="Priority:", bg="grey", font=("Times New Roman", 15))
+        self.priority_label.grid(row=4, column=0, padx=10, pady=10)
+
+        self.priority_entry = tk.Entry(root, font=("Times New Roman", 15))
+        self.priority_entry.grid(row=4, column=1, padx=10, pady=10)
+
+        self.enqueue_button = tk.Button(root, text="Enqueue", command=self.enqueue, bg="orange", fg="black", font=("Times New Roman", 15))
+        self.enqueue_button.grid(row=4, column=2, padx=10, pady=10)
+
+        self.dequeue_lowest_button = tk.Button(root, text="Dequeue Lowest", command=self.dequeue_lowest, bg="orange", fg="black", font=("Times New Roman", 15))
+        self.dequeue_lowest_button.grid(row=5, column=0, padx=10, pady=10)
+
+        self.dequeue_highest_button = tk.Button(root, text="Dequeue Highest", command=self.dequeue_highest, bg="orange", fg="black", font=("Times New Roman", 15))
+        self.dequeue_highest_button.grid(row=5, column=1, padx=10, pady=10)
+
+        self.traverse_lowest_button = tk.Button(root, text="Traverse Lowest", command=self.traverse_lowest, bg="orange", fg="black", font=("Times New Roman", 15))
+        self.traverse_lowest_button.grid(row=6, column=0, padx=10, pady=10)
+
+        self.traverse_highest_button = tk.Button(root, text="Traverse Highest", command=self.traverse_highest, bg="orange", fg="black", font=("Times New Roman", 15))
+        self.traverse_highest_button.grid(row=6, column=1, padx=10, pady=10)
+
+        self.clear_button = tk.Button(root, text="Clear Queue", command=self.clear_queue, bg="orange", fg="black", font=("Times New Roman", 15))
+        self.clear_button.grid(row=7, column=0, padx=10, pady=10)
+
+        self.output_listbox = tk.Listbox(root, height=5, width=50, bg="black", fg="white", font=("Times New Roman", 15))
+        self.output_listbox.grid(row=8, column=0, columnspan=3, padx=10, pady=10)
+
+    def set_size(self):
+        size = self.size_entry.get()
+        result = self.heap_queue.set_size(int(size)) if size.isdigit() and int(size) > 0 else "Please enter a valid positive size"
+        self.update_output(result)
+        self.size_entry.delete(0, tk.END)
+
+    def enqueue(self):
+        data = self.data_entry.get()
+        priority = self.priority_entry.get()
+        if not data:
+            result = "Data cannot be empty"
+        elif priority.isdigit():
+            result = self.heap_queue.enqueue(data, int(priority))
+            if "Enqueued" in result:
+                self.data_entry.delete(0, tk.END)
+                self.priority_entry.delete(0, tk.END)
+        else:
+            result = "Please enter a valid priority"
+        self.update_output(result)
+
+    def dequeue_lowest(self):
+        result = self.heap_queue.dequeue_lowest()
+        self.update_output(result)
+
+    def dequeue_highest(self):
+        result = self.heap_queue.dequeue_highest()
+        self.update_output(result)
+
+    def traverse_lowest(self):
+        result = self.heap_queue.traverse_lowest()
+        self.update_output(result)
+
+    def traverse_highest(self):
+        result = self.heap_queue.traverse_highest()
+        self.update_output(result)
+
+    def clear_queue(self):
+        result = self.heap_queue.clear_queue()
+        self.update_output(result)
+
+    def update_output(self, message):
+        self.output_listbox.delete(0, tk.END)
+        for line in message.split("\n"):
+            self.output_listbox.insert(tk.END, line)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = HeapQueueGUI(root)
+    root.mainloop()
