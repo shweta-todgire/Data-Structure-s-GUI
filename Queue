@@ -1,0 +1,168 @@
+### GUI BASED ON QUEUE WITH FOLLOWING OPERATIONS.
+### SET SIZE OPERATION SETS THE MAXIMUM SIZE OF THE QUEUE TO LIMIT HOW MANY ELEMENTS CAN BE ADDED.
+### ENQUEUE OPERATION ADDS A NEW ELEMENT TO THE END OF THE QUEUE.
+### DEQUEUE OPERATION REMOVES AND RETURNS THE FIRST ELEMENT FROM THE QUEUE IF IT IS NOT EMPTY.
+### TRAVERSE OPERATION DISPLAYS ALL ELEMENTS CURRENTLY IN THE QUEUE.
+### SORT OPERATION SORTS THE ELEMENTS IN THE QUEUE IN ASCENDING ORDER.
+### PREVIOUS ORDER OPERATION RESTORES THE QUEUE TO ITS ORIGINAL ORDER BEFORE SORTING.
+### CLEAR OPERATION REMOVES ALL ELEMENTS FROM THE QUEUE.
+
+
+import tkinter as tk
+from tkinter import messagebox
+
+class Queue:
+    def __init__(self):
+        self.queue = []  # Set queue as empty list
+        self.max_size = None
+        self.previous_order = []
+
+    def is_empty(self):
+        return len(self.queue) == 0
+
+    def is_full(self):
+        return self.max_size is not None and len(self.queue) >= self.max_size
+
+    def set_size(self, size):
+        if size > 0:
+            self.max_size = size
+        else:
+            messagebox.showwarning("Warning", "Queue size must be a positive")
+
+    def enqueue(self, data):
+        if data.strip():  # Checks if the data is not empty or whitespace
+            if self.max_size is None:
+                messagebox.showwarning("Warning", "Please set the queue size before enqueuing data")
+            elif self.is_full():
+                messagebox.showwarning("Warning", "Queue is full")
+            else:
+                self.queue.append(data)
+        else:
+            messagebox.showwarning("Warning", "Cannot enqueue empty data")
+
+    def dequeue(self):
+        if not self.is_empty():
+            return self.queue.pop(0)
+        else:
+            return None
+
+    def traverse(self):
+        return self.queue.copy()  # It will copy the queue
+
+    def clear(self):
+        self.queue = []  # Clear the queue
+
+    def sort(self):
+        self.previous_order = self.queue.copy()
+        self.queue.sort()
+
+    def restore_previous_order(self):
+        self.queue = [item for item in self.previous_order if item in self.queue]
+
+class QueueGUI:
+    def __init__(self, root):
+        self.queue = Queue()
+        self.root = root
+        self.root.title("Queue Operations")
+        self.root.geometry("500x650")
+        self.root.configure(bg="grey")
+
+        self.frame = tk.Frame(root, bg="grey")
+        self.frame.pack(pady=20)
+
+        self.title_label = tk.Label(self.frame, text="Shweta Todgire S120", font=("Times New Roman", 16), bg="grey", fg="White")
+        self.title_label.grid(row=0, column=0, columnspan=2, padx=5, pady=5)
+        self.queue_label = tk.Label(self.frame, text="QUEUE OPERATIONS", font=("Times New Roman", 20, "bold"), bg="grey", fg="Black")
+        self.queue_label.grid(row=1, column=0, columnspan=2, pady=5)
+
+        self.queue_display = tk.Listbox(self.frame, width=40, height=8, font=("Times New Roman", 16))
+        self.queue_display.grid(row=2, column=0, columnspan=2, pady=5)
+
+        self.size_entry = tk.Entry(self.frame, font=("Times New Roman", 16))
+        self.size_entry.grid(row=3, column=1, padx=10, pady=5)
+        self.size_button = tk.Button(self.frame, text="Set Size", font=("Times New Roman", 16), command=self.set_size, bg="purple", fg="white")
+        self.size_button.grid(row=3, column=0, padx=10, pady=5)
+
+        self.enqueue_entry = tk.Entry(self.frame, font=("Times New Roman", 16))
+        self.enqueue_entry.grid(row=4, column=1, padx=10, pady=5)
+        self.enqueue_button = tk.Button(self.frame, text="Enqueue", font=("Times New Roman", 16), command=self.enqueue, bg="dark green", fg="white")
+        self.enqueue_button.grid(row=4, column=0, padx=10, pady=5)
+
+        self.dequeue_button = tk.Button(self.frame, text="Dequeue", font=("Times New Roman", 16), command=self.dequeue, bg="dark red", fg="white")
+        self.dequeue_button.grid(row=5, column=0, padx=10, pady=5)
+        self.traverse_button = tk.Button(self.frame, text="Traverse", font=("Times New Roman", 16), command=self.traverse, bg="dark blue", fg="white")
+        self.traverse_button.grid(row=5, column=1, padx=10, pady=5)
+
+        self.sort_button = tk.Button(self.frame, text="Sort", font=("Times New Roman", 16), command=self.sort, bg="orange", fg="black")
+        self.sort_button.grid(row=6, column=0, padx=10, pady=5)
+        self.previous_order_button = tk.Button(self.frame, text="Previous Order", font=("Times New Roman", 16), command=self.restore_previous_order, bg="Yellow", fg="black")
+        self.previous_order_button.grid(row=6, column=1, padx=10, pady=5)
+
+        self.clear_button = tk.Button(self.frame, text="Clear", font=("Times New Roman", 16), command=self.clear, bg="white", fg="black")
+        self.clear_button.grid(row=7, column=0, padx=10, pady=5)
+
+        self.traverse_label = tk.Label(self.frame, text=" ", wraplength=400, font=("Times New Roman", 16), bg="grey", fg="white")
+        self.traverse_label.grid(row=8, column=0, columnspan=2, pady=10)
+
+        self.update_display()
+
+    def set_size(self):
+        size = self.size_entry.get()
+        try:
+            size = int(size)
+            if size > 0:
+                self.queue.set_size(size)
+                self.size_entry.delete(0, tk.END)
+                messagebox.showinfo("Size Set", f"Queue size set to {size}")
+            else:
+                messagebox.showwarning("Warning", "Queue size must be a positive")
+        except ValueError:
+            messagebox.showwarning("Warning", "Queue size must be an integer")
+
+    def enqueue(self):
+        data = self.enqueue_entry.get()
+        if data.strip():  # Checks if the data is not empty or whitespace
+            self.queue.enqueue(data)
+            self.enqueue_entry.delete(0, tk.END)
+            self.update_display()
+        else:
+            messagebox.showwarning("Warning", "Cannot enqueue empty data")
+
+    def dequeue(self):
+        data = self.queue.dequeue()
+        if data:
+            messagebox.showinfo("Dequeue", f"Dequeued: {data}")
+            self.update_display()
+        else:
+            messagebox.showwarning("Warning", "Cannot dequeue...Queue is empty")
+
+    def traverse(self):
+        elements = self.queue.traverse()
+        self.traverse_label.config(text="Queue elements: " + " -> ".join(elements) if elements else "Queue is empty")
+
+    def sort(self):
+        self.queue.sort()
+        self.update_display()
+        elements = self.queue.traverse()
+        self.traverse_label.config(text="Sorted Queue elements: " + " -> ".join(elements) if elements else "Queue is empty")
+
+    def restore_previous_order(self):
+        self.queue.restore_previous_order()
+        self.update_display()
+        elements = self.queue.traverse()
+        self.traverse_label.config(text="Previous Ordered Queue elements: " + " -> ".join(elements) if elements else "Queue is empty")
+
+    def clear(self):
+        self.queue.clear()
+        self.update_display()
+        self.traverse_label.config(text="Queue is empty")
+
+    def update_display(self):
+        self.queue_display.delete(0, tk.END)
+        for item in self.queue.traverse():  # Adds each element in listbox
+            self.queue_display.insert(tk.END, item)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = QueueGUI(root)
+    root.mainloop()

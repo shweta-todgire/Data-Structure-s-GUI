@@ -1,0 +1,188 @@
+### GUI BASED ON PRIORITY QUEUE WITH BELOW OPERATIONS.
+### SET SIZE OPERATION SETS THE MAXIMUM SIZE OF THE PRIORITY QUEUE.
+### ENQUEUE OERATION ADDS AN ITEM TO THE QUEUE WITH A SPECIFIED PRIORITY. ENSURES THAT PRIORITY IS UNIQUE AND DATA IS NOT EMPTY.
+### DEQUEUE LOWEST OPERATION REMOVES AND RETURNS THE ITEM WITH THE LOWEST PRIORITY FROM THE QUEUE.
+### DEQUEUE HIGHEST OPERATION REMOVES AND RETURNS THE ITEM WITH THE HIGHEST PRIORITY FROM THE QUEUE.
+### TRAVERSE LOWEST OPERATION DISPLAYS THE QUEUE ITEMS IN ORDER FROM LOWEST TO HIGHEST PRIORITY.
+### TRAVERSE HIGHEST OPERATION DISPLAYS THE QUEUE ITEMS IN ORDER FROM HIGHEST TO LOWEST PRIORITY.
+### CLEAR QUEUE OPERATION REMOVES ALL ITEMS FROM THE QUEUE.
+
+import tkinter as tk
+from tkinter import messagebox
+
+class PriorityQueue:
+    def __init__(self, size=0):
+        self.queue = []
+        self.size = size
+
+    def is_empty(self):
+        return len(self.queue) == 0
+
+    def is_full(self):
+        return len(self.queue) >= self.size
+
+    def enqueue(self, data, priority):
+        if self.size == 0:
+            messagebox.showwarning("Warning", "Please set the queue size before enqueuing data")
+            return False
+        
+        if data.strip():  # Check if the data is not empty or whitespace
+            if self.is_full():
+                messagebox.showwarning("Warning", "Queue is full")
+                return False
+            elif any(p == priority for p, d in self.queue):
+                messagebox.showwarning("Warning", "Priority already exists. Please enter a unique priority.")
+                return False
+            else:
+                self.queue.append((priority, data))
+                self.queue.sort(key=lambda x: x[0])  # Smallest priority to highest
+                return True
+        else:
+            messagebox.showwarning("Warning", "Data cannot be empty")
+            return False
+
+    def dequeue_lowest(self):
+        if not self.is_empty():
+            return self.queue.pop(0)[1]  # Remove first element (smallest priority)
+        else:
+            return None
+
+    def dequeue_highest(self):
+        if not self.is_empty():
+            return self.queue.pop(-1)[1]  # Remove last element (highest priority)
+        else:
+            return None
+
+    def traverse_lowest(self):
+        if not self.is_empty():
+            return [f"{data}, Priority: {priority}" for priority, data in self.queue]  # Format each item
+        else:
+            return ["Queue is empty"]
+
+    def traverse_highest(self):
+        if not self.is_empty():
+            return [f"{data}, Priority: {priority}" for priority, data in reversed(self.queue)]  # Format each item
+        else:
+            return ["Queue is empty"]
+
+    def clear_queue(self):
+        self.queue.clear()
+
+
+class PriorityQueueGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Priority Queue GUI")
+        self.root.configure(bg="gray")
+
+        self.priority_queue = PriorityQueue()
+
+        # Labels and entry widgets
+        self.title_label = tk.Label(root, text="Shweta Todgire S120", font=("Times New Roman", 16), bg="gray", fg="white")
+        self.title_label.grid(row=0, column=0, columnspan=3, padx=5, pady=5)
+
+        self.queue_label = tk.Label(root, text="PRIORITY QUEUE", font=("Times New Roman", 20, "bold"), bg="gray", fg="black")
+        self.queue_label.grid(row=1, column=0, columnspan=3, pady=5)
+
+        self.size_label = tk.Label(root, text="Queue Size:", bg="gray", font=("Times New Roman", 16))
+        self.size_label.grid(row=2, column=0, padx=10, pady=10)
+
+        self.size_entry = tk.Entry(root, font=("Times New Roman", 16))
+        self.size_entry.grid(row=2, column=1, padx=10, pady=10)
+
+        self.set_size_button = tk.Button(root, text="Set Size", command=self.set_size, bg="yellow", font=("Times New Roman", 16))
+        self.set_size_button.grid(row=2, column=2, padx=10, pady=10)
+
+        self.data_label = tk.Label(root, text="Data:", bg="gray", font=("Times New Roman", 16))
+        self.data_label.grid(row=3, column=0, padx=10, pady=10)
+
+        self.data_entry = tk.Entry(root, font=("Times New Roman", 16))
+        self.data_entry.grid(row=3, column=1, padx=10, pady=10)
+
+        self.priority_label = tk.Label(root, text="Priority:", bg="gray", font=("Times New Roman", 16))
+        self.priority_label.grid(row=4, column=0, padx=10, pady=10)
+
+        self.priority_entry = tk.Entry(root, font=("Times New Roman", 16))
+        self.priority_entry.grid(row=4, column=1, padx=10, pady=10)
+
+        self.enqueue_button = tk.Button(root, text="Enqueue", command=self.enqueue, bg="dark green", fg="white", font=("Times New Roman", 16))
+        self.enqueue_button.grid(row=4, column=2, padx=10, pady=10)
+
+        self.dequeue_lowest_button = tk.Button(root, text="Dequeue Lowest", command=self.dequeue_lowest, bg="dark red", fg="white", font=("Times New Roman", 16))
+        self.dequeue_lowest_button.grid(row=5, column=0, padx=10, pady=10)
+
+        self.dequeue_highest_button = tk.Button(root, text="Dequeue Highest", command=self.dequeue_highest, bg="dark red", fg="white", font=("Times New Roman", 16))
+        self.dequeue_highest_button.grid(row=5, column=1, padx=10, pady=10)
+
+        self.traverse_lowest_button = tk.Button(root, text="Traverse Lowest", command=self.traverse_lowest, bg="dark blue", fg="white", font=("Times New Roman", 16))
+        self.traverse_lowest_button.grid(row=6, column=0, padx=10, pady=10)
+
+        self.traverse_highest_button = tk.Button(root, text="Traverse Highest", command=self.traverse_highest, bg="dark blue", fg="white", font=("Times New Roman", 16))
+        self.traverse_highest_button.grid(row=6, column=1, padx=10, pady=10)
+
+        self.clear_button = tk.Button(root, text="Clear Queue", command=self.clear_queue, bg="purple", fg="white", font=("Times New Roman", 16))
+        self.clear_button.grid(row=7, column=0, columnspan=2, padx=10, pady=10)
+
+        self.output_listbox = tk.Listbox(root, height=5, width=50, bg="black", fg="yellow", font=("Times New Roman", 16))
+        self.output_listbox.grid(row=8, column=0, columnspan=3, padx=10, pady=10)
+
+    def set_size(self):
+        size = self.size_entry.get()
+        if size.isdigit() and int(size) > 0:
+            self.priority_queue.size = int(size)
+            self.update_output(f"Queue size set to {size}")
+            self.size_entry.delete(0, tk.END)
+        else:
+            messagebox.showerror("Invalid Input", "Please enter a valid positive size")
+
+    def enqueue(self):
+        data = self.data_entry.get()
+        priority = self.priority_entry.get()
+        if not data:
+            messagebox.showerror("Invalid Input", "Data cannot be empty")
+            return
+        if priority.isdigit():
+            if self.priority_queue.enqueue(data, int(priority)):
+                self.update_output(f"Enqueued: {data} with priority {priority}")
+                self.data_entry.delete(0, tk.END)
+                self.priority_entry.delete(0, tk.END)
+            # Errors are handled within the enqueue method
+        else:
+            messagebox.showerror("Invalid Input", "Please enter a valid priority")
+
+    def dequeue_lowest(self):
+        item = self.priority_queue.dequeue_lowest()
+        if item:
+            self.update_output(f"Dequeued (Lowest Priority): {item}")
+        else:
+            messagebox.showerror("Queue Empty", "Priority queue is empty")
+
+    def dequeue_highest(self):
+        item = self.priority_queue.dequeue_highest()
+        if item:
+            self.update_output(f"Dequeued (Highest Priority): {item}")
+        else:
+            messagebox.showerror("Queue Empty", "Priority queue is empty")
+
+    def traverse_lowest(self):
+        items = self.priority_queue.traverse_lowest()
+        self.update_output("Queue (Lowest to Highest Priority):\n" + "\n".join(items))
+
+    def traverse_highest(self):
+        items = self.priority_queue.traverse_highest()
+        self.update_output("Queue (Highest to Lowest Priority):\n" + "\n".join(items))
+
+    def clear_queue(self):
+        self.priority_queue.clear_queue()
+        self.update_output("Queue cleared")
+
+    def update_output(self, message):
+        self.output_listbox.delete(0, tk.END)
+        for line in message.split("\n"):
+            self.output_listbox.insert(tk.END, line)
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PriorityQueueGUI(root)
+    root.mainloop()
