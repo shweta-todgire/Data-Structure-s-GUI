@@ -1,0 +1,148 @@
+### GUI BASED ON DOUBLE LINKED LIST USING INSERTION AT BEGINING, INSERTION AT THE END, DELETION, TRAVERSE OPERATIONS.
+### INSERTION AT BEGINNING OPERATION ADDS A NEW NODE TO THE START OF THE LIST, MAKING IT THE NEW HEAD.
+### INSERTION AT END OPERATION APPENDS A NEW NODE TO THE END OF THE LIST.
+### DELETION OPERATION REMOVES THE FIRST NODE THAT MATCHES THE GIVEN DATA FROM THE LIST.
+### TRAVERSE OPERATION DISPLAYS ALL NODES IN THE LIST FROM THE HEAD TO THE LAST NODE.
+
+import tkinter as tk
+from tkinter import messagebox
+
+# Node class for doubly linked list
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+# Doubly linked list class
+class DoublyLinkedList:
+    def __init__(self):
+        self.head = None
+
+    # Insert at the beginning of the list
+    def insert_at_beginning(self, data):
+        new_node = Node(data)
+        new_node.next = self.head
+        if self.head is not None:
+            self.head.prev = new_node
+        self.head = new_node
+
+    # Insert at the end of the list
+    def insert_at_end(self, data):
+        new_node = Node(data)
+        if self.head is None:
+            self.head = new_node
+            return
+        last = self.head
+        while last.next:
+            last = last.next
+        last.next = new_node
+        new_node.prev = last
+
+    # Delete a node with a given key
+    def delete_node(self, key):
+        temp = self.head
+        if temp is not None:
+            if temp.data == key:
+                self.head = temp.next
+                if self.head:
+                    self.head.prev = None
+                return
+        while temp:
+            if temp.data == key:
+                break
+            temp = temp.next
+        if temp is None:
+            return
+        if temp.next is not None:
+            temp.next.prev = temp.prev
+        if temp.prev is not None:
+            temp.prev.next = temp.next
+
+    # Traverse the list and return data in a list
+    def traverse(self):
+        nodes = []
+        current = self.head
+        while current:
+            nodes.append(current.data)
+            current = current.next
+        nodes.append(None)  # Append None at the end of the list
+        return nodes
+
+# GUI application class
+class DoublyLinkedListApp:
+    def __init__(self, root):
+        self.dll = DoublyLinkedList()
+        self.root = root
+        self.root.title("Doubly Linked List GUI")  # Window title
+        self.root.geometry("600x500")  # Window size
+        self.root.configure(bg="Grey")  # Background color
+
+        # Title label
+        self.title_label = tk.Label(root, text="Doubly Linked List Operations", font=("Helvetica", 20, "bold"), bg="Grey")
+        self.title_label.grid(row=1, columnspan=3, pady=20)
+
+        # Data entry label and entry field
+        self.data_label = tk.Label(root, text="Data:", font=("Helvetica", 16), bg="Grey")
+        self.data_label.grid(row=2, column=0, padx=10, pady=10)
+        self.data_entry = tk.Entry(root, font=("Helvetica", 16))
+        self.data_entry.grid(row=2, column=1, padx=10, pady=10)
+
+        # Buttons for operations with styling
+        self.insert_beginning_button = tk.Button(root, text="Insert at Beginning", font=("Helvetica", 16), command=self.insert_data_beginning, bg="Dark Green", fg="white", width=18)
+        self.insert_beginning_button.grid(row=3, column=1, padx=10, pady=10)
+        self.insert_end_button = tk.Button(root, text="Insert at End", font=("Helvetica", 16), command=self.insert_data_end, bg="Dark Blue", fg="white", width=18)
+        self.insert_end_button.grid(row=4, column=1, padx=10, pady=10)
+        self.delete_button = tk.Button(root, text="Delete", font=("Helvetica", 16), command=self.delete_data, bg="Dark Red", fg="white", width=18)
+        self.delete_button.grid(row=5, column=1, padx=10, pady=10)
+        self.traverse_button = tk.Button(root, text="Traverse", font=("Helvetica", 16), command=self.traverse_list, bg="Purple", fg="white", width=18)
+        self.traverse_button.grid(row=6, column=1, padx=10, pady=10)
+
+        # Result label for displaying traversal output
+        self.result_label = tk.Label(root, text="", font=("Helvetica", 16), bg="Grey", wraplength=300, justify="left")
+        self.result_label.grid(row=7, columnspan=2, padx=10, pady=10)
+
+    # Method to insert data at the beginning of the list
+    def insert_data_beginning(self):
+        data = self.data_entry.get()
+        if data:
+            self.dll.insert_at_beginning(data)
+            messagebox.showinfo("Success", "Data inserted at beginning successfully.")
+            self.data_entry.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Warning", "Please enter some data.")
+
+    # Method to insert data at the end of the list
+    def insert_data_end(self):
+        data = self.data_entry.get()
+        if data:
+            self.dll.insert_at_end(data)
+            messagebox.showinfo("Success", "Data inserted at end successfully.")
+            self.data_entry.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Warning", "Please enter some data.")
+
+    # Method to delete data from the list
+    def delete_data(self):
+        data = self.data_entry.get()
+        if data:
+            self.dll.delete_node(data)
+            messagebox.showinfo("Success", "Data deleted successfully.")
+            self.data_entry.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Warning", "Please enter some data.")
+
+    # Method to traverse the list and display data
+    def traverse_list(self):
+        nodes = self.dll.traverse()
+        if nodes:
+            nodes_str = " -> ".join(str(node) if node is not None else "None" for node in nodes)
+            self.result_label.config(text=nodes_str)
+        else:
+            self.result_label.config(text="List is empty.")
+
+# Main function to run the GUI application
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = DoublyLinkedListApp(root)
+    root.mainloop()
