@@ -1,0 +1,117 @@
+### GUI FOR ABSTRACT DATA TYPE USING PUSH, POP, PEEK OPERATIONS IN STACK. 
+### PUSH OPERATION INSERTS AN ELEMENT IN STACK...POP OPERATION POP OUT AN ELEMENT FROM STACK AND PEEK OPERATION PEEKS AN ELEMENT FROM STACK WHICH IS AT THE TOP OF STACK.
+
+import tkinter as tk
+from tkinter import messagebox
+
+class StackGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Abstract Data Type(Stack)")
+       
+       
+        # Create a frame to hold all widgets
+        self.main_frame = tk.Frame(root, padx=20, pady=20,bg ="Grey")
+        self.main_frame.pack()
+       
+        # Entry and Push Button
+        self.entry_label = tk.Label(self.main_frame, text=" Enter Element: ", font=("Arial", 20), bg="Grey", fg="Black")
+        self.entry_label.grid(row=0, column=0, padx=10, pady=10, sticky=tk.W)
+       
+        self.entry = tk.Entry(self.main_frame, width=20, font=("Arial", 15),bg="White")
+        self.entry.grid(row=0, column=1, padx=5, pady=5)
+       
+        self.push_button = tk.Button(self.main_frame, text="Push", width=10, command=self.push_element, font=("Arial", 15),bg="Dark red",fg="White")
+        self.push_button.grid(row=1, column=0, padx=10, pady=5)
+       
+        # Pop Button
+        self.pop_button = tk.Button(self.main_frame, text="Pop", width=10, command=self.pop_element, font=("Arial", 15),bg="Green",fg="White")
+        self.pop_button.grid(row=1, column=1, padx=10, pady=5)
+       
+        # Peek Button
+        self.peek_button = tk.Button(self.main_frame, text="Peek", width=10, command=self.peek_element, font=("Arial", 15),bg="Dark Blue",fg="White")
+        self.peek_button.grid(row=1, column=2, padx=10, pady=5)
+         
+        #Stack Contents Label and Text Area
+        self.stack_contents_label = tk.Label(self.main_frame, text=" Stack Elements: ", font=("Arial", 20), bg="Grey", fg="Black")
+        self.stack_contents_label.grid(row=2, column=0, columnspan=3, padx=30, pady=30)
+       
+        self.stack_contents_text = tk.Text(self.main_frame, height=10, width=30, font=("Arial", 24), bg="white", fg="black")
+        self.stack_contents_text.grid(row=3, column=0, columnspan=3, padx=10, pady= 10)
+       
+        # Initialize Stack
+        self.stack = Stack()
+        self.update_stack_contents()
+
+    #Push Element.    
+    def push_element(self):
+        element = self.entry.get()
+        if element:
+            self.stack.push(element)
+            self.update_stack_contents()
+            self.entry.delete(0, tk.END)  #Clear entry after pushing
+        else:
+            messagebox.showwarning("Input is Empty", "Please enter an element.")
+
+    #Pop Element.
+    def pop_element(self):
+        element = self.stack.pop()
+        if element is not None:
+            messagebox.showinfo("Popped Element", f"Popped element: {element}")
+            self.update_stack_contents()
+        else:
+            messagebox.showwarning("Empty Stack", "Stack is empty, cannot pop.")
+
+    #Peek Element.
+    def peek_element(self):
+        element = self.stack.peek()
+        if element is not None:
+            messagebox.showinfo("Top Element", f"Peek element: {element}")
+        else:
+            messagebox.showwarning("Empty Stack", "Stack is empty, cannot peek.")
+   
+    def display_stack(self):
+        self.update_stack_contents()
+   
+    def update_stack_contents(self):
+        self.stack_contents_text.delete(1.0, tk.END)
+        stack_elements = self.stack.display()
+        for element in stack_elements:
+            self.stack_contents_text.insert(tk.END, f"{element}\n")
+
+class Stack:
+    def __init__(self):
+        self.array = []
+        #Stack is Empty
+        self.top = -1  
+
+    def push(self, element):
+        # Check Overflow or Stack is Full
+        self.array.append(element)
+        self.top += 1
+
+    def pop(self):
+        # Check Underflow OR Stack Empty
+        if self.top == -1:
+            #Stack is Empty
+            return None  
+        else:
+            element = self.array[self.top]
+            # Remove from stack
+            self.array.pop()
+            self.top -= 1
+            return element
+
+    def peek(self):
+        if self.top == -1:
+            return None
+        else:
+            return self.array[self.top]
+
+    def display(self):
+        return self.array
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = StackGUI(root)
+    root.mainloop()
