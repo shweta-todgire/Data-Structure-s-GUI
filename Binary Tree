@@ -1,0 +1,256 @@
+### GUI BASED ON BINARY TREE USING THE BELOW OPERATIONS.
+### INSERT OPERATION INSERTS A VALUE INTO THE BINARY TREE. THE VALUE MUST BE AN INTEGER.
+### DELETE OPERATION REMOVES A VALUE FROM THE BINARY TREE.
+### INORDER OPERATION SHOWS THE VALUES OF THE BINARY TREE IN INORDER TRAVERSAL (LEFT, ROOT, RIGHT).
+### PREORDER OPERATION SHOWS THE VALUES OF THE BINARY TREE IN PREORDER TRAVERSAL (ROOT, LEFT, RIGHT).
+### POSTORDER OPERATION SHOWS THE VALUES OF THE BINARY TREE IN POSTORDER TRAVERSAL (LEFT, RIGHT, ROOT).
+### FIND MIN OPERATION DISPLAYS THE MINIMUM VALUE IN THE BINARY TREE.
+### FIND MAX OPERATION DISPLAYS THE MAXIMUM VALUE IN THE BINARY TREE.
+### CLEAR TREE OPERATION REMOVES ALL NODES FROM THE BINARY TREE.
+
+import tkinter as tk
+from tkinter import messagebox
+
+class Node:
+    def __init__(self, key):
+        self.left = None
+        self.right = None
+        self.val = key
+
+class BinaryTree:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, key):
+        if self.root is None:
+            self.root = Node(key)
+        else:
+            self._insert(self.root, key)
+
+    def _insert(self, root, key):
+        if key < root.val:
+            if root.left is None:
+                root.left = Node(key)
+            else:
+                self._insert(root.left, key)
+        else:
+            if root.right is None:
+                root.right = Node(key)
+            else:
+                self._insert(root.right, key)
+
+    def delete(self, key):
+        self.root = self._delete(self.root, key)
+
+    def _delete(self, root, key):
+        if root is None:
+            return root
+        if key < root.val:
+            root.left = self._delete(root.left, key)
+        elif key > root.val:
+            root.right = self._delete(root.right, key)
+        else:
+            if root.left is None:
+                return root.right
+            elif root.right is None:
+                return root.left
+            min_larger_node = self._get_min(root.right)
+            root.val = min_larger_node.val
+            root.right = self._delete(root.right, min_larger_node.val)
+        return root
+
+    def _get_min(self, node):
+        current = node
+        while current.left is not None:
+            current = current.left
+        return current
+
+    def _get_max(self, node):
+        current = node
+        while current.right is not None:
+            current = current.right
+        return current
+
+    def inorder_traversal(self):
+        return self._inorder_traversal(self.root)
+
+    def _inorder_traversal(self, root):
+        res = []
+        if root:
+            res = self._inorder_traversal(root.left)
+            res.append(root.val)
+            res = res + self._inorder_traversal(root.right)
+        return res
+
+    def preorder_traversal(self):
+        return self._preorder_traversal(self.root)
+
+    def _preorder_traversal(self, root):
+        res = []
+        if root:
+            res.append(root.val)
+            res = res + self._preorder_traversal(root.left)
+            res = res + self._preorder_traversal(root.right)
+        return res
+
+    def postorder_traversal(self):
+        return self._postorder_traversal(self.root)
+
+    def _postorder_traversal(self, root):
+        res = []
+        if root:
+            res = self._postorder_traversal(root.left)
+            res = res + self._postorder_traversal(root.right)
+            res.append(root.val)
+        return res
+
+    def find_min(self):
+        if self.root:
+            return self._get_min(self.root).val
+        return None
+
+    def find_max(self):
+        if self.root:
+            return self._get_max(self.root).val
+        return None
+
+    def search(self, key):
+        return self._search(self.root, key)
+
+    def _search(self, root, key):
+        if root is None:
+            return False
+        if key == root.val:
+            return True
+        elif key < root.val:
+            return self._search(root.left, key)
+        else:
+            return self._search(root.right, key)
+
+class BinaryTreeGUI:
+    def __init__(self, root):
+        self.tree = root
+        self.window = tk.Tk()
+        self.window.title("Binary Tree GUI")
+        self.window.geometry("500x700")
+        self.window.configure(bg="grey")
+
+        # Title label
+        self.label = tk.Label(self.window, bg="grey", fg="white", text="Shweta Mahendra Todgire S120.", font=("Times New Roman", 24,))
+        self.label.pack(pady=10)
+
+        # Frame for entry and label
+        self.entry_frame = tk.Frame(self.window, bg="grey")
+        self.entry_frame.pack(pady=10)
+
+        # Input fields
+        self.label = tk.Label(self.entry_frame, bg="grey", fg="black", text="Enter a value:", font=("Times New Roman", 20))
+        self.label.grid(row=0, column=0, padx=10)  
+        self.entry = tk.Entry(self.entry_frame, bg="black", fg="white", font=("Times New Roman", 20))
+        self.entry.grid(row=0, column=1, padx=10)  
+
+        # Frame for buttons
+        self.button_frame = tk.Frame(self.window, bg="grey")
+        self.button_frame.pack(pady=10)
+
+        # Buttons
+        self.insert_button = tk.Button(self.button_frame, text="    Insert   ", bg="Orange", fg="White", font=("Times new Roman", 14), command=self.insert_value)
+        self.insert_button.grid(row=0, column=0, padx=50, pady=10)  
+        self.delete_button = tk.Button(self.button_frame, text="    Delete   ", bg="Orange", fg="White", font=("Times new Roman", 14), command=self.delete_value)
+        self.delete_button.grid(row=0, column=1, padx=50, pady=10)   
+        self.inorder_button = tk.Button(self.button_frame, text="   Inorder  ", bg="Orange", fg="White", font=("Times new Roman", 14), command=self.show_inorder)
+        self.inorder_button.grid(row=0, column=2, padx=50, pady=10)  
+        self.preorder_button = tk.Button(self.button_frame, text="  Preorder  ", bg="Orange", fg="White", font=("Times new Roman", 14), command=self.show_preorder)
+        self.preorder_button.grid(row=0, column=3, padx=50, pady=10)  
+        self.postorder_button = tk.Button(self.button_frame, text=" Postorder ", bg="Orange", fg="White", font=("Times new Roman", 14), command=self.show_postorder)
+        self.postorder_button.grid(row=1, column=0, padx=50, pady=10)  
+        self.find_min_button = tk.Button(self.button_frame, text=" Find Min ", bg="Orange", fg="White", font=("Times new Roman", 14), command=self.find_min)
+        self.find_min_button.grid(row=1, column=1, padx=50, pady=10)  
+        self.find_max_button = tk.Button(self.button_frame, text=" Find Max ", bg="Orange", fg="White", font=("Times new Roman", 14), command=self.find_max)
+        self.find_max_button.grid(row=1, column=2, padx=50, pady=10)  
+        # Removed the search button
+        self.clear_button = tk.Button(self.button_frame, text=" Clear Tree ", bg="Orange", fg="White", font=("Times new Roman", 14), command=self.clear_tree)
+        self.clear_button.grid(row=1, column=3, padx=50, pady=10)  
+
+        # Canvas for tree drawing
+        self.canvas = tk.Canvas(self.window, width=600, height=400, bg='white')
+        self.canvas.pack(pady=10)
+
+        self.window.mainloop()
+
+    def insert_value(self):
+        try:
+            value = int(self.entry.get())
+            self.tree.insert(value)
+            messagebox.showinfo("Info", f"Inserted {value}")
+        except ValueError:
+            messagebox.showerror("Error", "Please enter a valid integer.")
+        self.draw_tree()
+
+    def delete_value(self):
+        try:
+            value = int(self.entry.get())
+            self.tree.delete(value)
+            messagebox.showinfo("Info", f"Deleted {value}")
+        except ValueError:
+            messagebox.showerror("Error", "Please enter a valid integer.")
+        self.draw_tree()
+
+    def show_inorder(self):
+        result = self.tree.inorder_traversal()
+        messagebox.showinfo("Inorder Traversal", f"Inorder Traversal: {result}")
+        self.draw_tree()
+
+    def show_preorder(self):
+        result = self.tree.preorder_traversal()
+        messagebox.showinfo("Preorder Traversal", f"Preorder Traversal: {result}")
+        self.draw_tree()
+
+    def show_postorder(self):
+        result = self.tree.postorder_traversal()
+        messagebox.showinfo("Postorder Traversal", f"Postorder Traversal: {result}")
+        self.draw_tree()
+
+    def find_min(self):
+        min_value = self.tree.find_min()
+        if min_value is not None:
+            messagebox.showinfo("Find Min", f"Minimum Value: {min_value}")
+        else:
+            messagebox.showinfo("Find Min", "Tree is empty.")
+   
+    def find_max(self):
+        max_value = self.tree.find_max()
+        if max_value is not None:
+            messagebox.showinfo("Find Max", f"Maximum Value: {max_value}")
+        else:
+            messagebox.showinfo("Find Max", "Tree is empty.")
+        
+    def clear_tree(self):
+        self.tree.root = None
+        self.canvas.delete("all")
+        messagebox.showinfo("Info", "Tree has been cleared.")
+
+    def draw_tree(self):
+        self.canvas.delete("all")  # Clear the canvas
+        if self.tree.root is not None:
+            self._draw_tree(self.tree.root, 300, 20, 100)
+
+    def _draw_tree(self, node, x, y, dx):
+        if node is None:
+            return
+        # Draw node as a square
+        size = 20
+        self.canvas.create_rectangle(x-size, y-size, x+size, y+size, fill='black', outline='blue')
+        self.canvas.create_text(x, y, text=str(node.val), fill='white',font=("Times New Roman", 16))
+
+        # Draw left and right branches
+        if node.left is not None:
+            self.canvas.create_line(x, y, x-dx, y+50, fill='black')
+            self._draw_tree(node.left, x-dx, y+50, dx)
+        if node.right is not None:
+            self.canvas.create_line(x, y, x+dx, y+50, fill='black')
+            self._draw_tree(node.right, x+dx, y+50, dx)
+
+if __name__ == "__main__":
+    tree = BinaryTree()
+    app = BinaryTreeGUI(tree)
