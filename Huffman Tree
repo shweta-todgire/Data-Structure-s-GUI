@@ -1,0 +1,187 @@
+### Write a program to implement Huffman Coding using tree using GUI. Below are short points that summarizing the code-
+### Encode: Compresses text into a binary string using Huffman coding.
+### Codebook: Generates a mapping of characters to their corresponding binary codes.
+### Decode: Converts the binary string back to the original text.
+
+import heapq
+from collections import Counter
+import tkinter as tk
+from tkinter import messagebox, scrolledtext
+
+class Node:
+    def __init__(self, char=None, freq=None):
+        self.char = char
+        self.freq = freq
+        self.left = None
+        self.right = None
+
+    def __lt__(self, other):
+        return self.freq < other.freq
+
+def build_huffman_tree(frequencies):
+    heap = [Node(char, freq) for char, freq in frequencies.items()]
+    heapq.heapify(heap)
+
+    while len(heap) > 1:
+        left = heapq.heappop(heap)
+        right = heapq.heappop(heap)
+        merged = Node(freq=left.freq + right.freq)
+        merged.left = left
+        merged.right = right
+        heapq.heappush(heap, merged)
+    
+    return heap[0]
+
+def generate_codes(node, prefix="", codebook={}):
+    if node:
+        if node.char is not None:
+            codebook[node.char] = prefix
+        generate_codes(node.left, prefix + "0", codebook)
+        generate_codes(node.right, prefix + "1", codebook)
+    return codebook
+
+def huffman_encoding(data):
+    if not data:
+        return "", {}
+    
+    frequencies = Counter(data)
+    root = build_huffman_tree(frequencies)
+    codebook = generate_codes(root)
+    encoded_data = ''.join(codebook[char] for char in data)
+    return encoded_data, codebook, root
+
+def huffman_decoding(encoded_data, codebook):
+    reverse_codebook = {v: k for k, v in codebook.items()}
+    decoded_data = ""
+    temp_code = ""
+    for bit in encoded_data:
+        temp_code += bit
+        if temp_code in reverse_codebook:
+            decoded_data += reverse_codebook[temp_code]
+            temp_code = ""
+    return decoded_data
+
+def clear_entries():
+    entry_data.delete(0, tk.END)
+    entry_encoded_data.delete("1.0", tk.END)
+    entry_codebook.delete("1.0", tk.END)
+    entry_decoded_data.delete(0, tk.END)
+    label_actual_size.config(text="Actual Size: N/A")
+    label_compressed_size.config(text="Compressed Size: N/A")
+    canvas.delete("all")
+
+def encode():
+    data = entry_data.get().strip()
+    if not data:
+        messagebox.showwarning("Input Error", "Please enter some text to encode.")
+        return
+    
+    encoded_data, codebook, root = huffman_encoding(data)
+    entry_encoded_data.delete("1.0", tk.END)
+    entry_encoded_data.insert(tk.END, encoded_data)
+    entry_codebook.delete("1.0", tk.END)
+    for char, code in codebook.items():
+        entry_codebook.insert(tk.END, f"'{char}': {code}\n")
+
+    visualize_tree(root)
+
+    actual_size = len(data) * 8  # Size in bits
+    compressed_size = len(encoded_data)  # Size in bits
+    label_actual_size.config(text=f"Actual Size: {actual_size} bits ({actual_size // 8} bytes)")
+    label_compressed_size.config(text=f"Compressed Size: {compressed_size} bits ({compressed_size // 8} bytes)")
+
+def decode():
+    encoded_data = entry_encoded_data.get("1.0", tk.END).strip()
+    codebook_text = entry_codebook.get("1.0", tk.END).strip()
+    if not encoded_data or not codebook_text:
+        messagebox.showwarning("Input Error", "Please encode some text first.")
+        return
+    
+    codebook = {}
+    for line in codebook_text.splitlines():
+        char, code = line.split(': ')
+        codebook[char.strip("'")] = code.strip()
+    
+    decoded_data = huffman_decoding(encoded_data, codebook)
+    entry_decoded_data.delete(0, tk.END)
+    entry_decoded_data.insert(tk.END, decoded_data)
+
+def visualize_tree(node, x=400, y=50, x_offset=200, y_offset=50):
+    if node:
+        size = 20  
+        canvas.create_oval(x-size, y-size, x+size, y+size, fill='black', outline='blue')
+        if node.char:  # Leaf node
+            canvas.create_text(x, y, text=f"{node.char} ({node.freq})", fill='white', font=("Times New Roman", 16))
+        else:  # Internal node
+            canvas.create_text(x, y, text=f"{node.freq}", fill='white', font=("Times New Roman", 12))
+
+        if node.left:
+            canvas.create_line(x, y+size, x - x_offset, y + y_offset - size, fill='black')
+            visualize_tree(node.left, x - x_offset, y + y_offset, x_offset // 2, y_offset)
+
+        if node.right:
+            canvas.create_line(x, y+size, x + x_offset, y + y_offset - size, fill='black')
+            visualize_tree(node.right, x + x_offset, y + y_offset, x_offset // 2, y_offset)
+
+# GUI
+root = tk.Tk()
+root.title("Huffman Encoder/Decoder")
+root.configure(bg="Grey")
+
+label_header = tk.Label(root, text="Huffman Encoder/Decoder", font=("Times New Roman", 16, "bold"), bg="Grey", fg="White")
+label_header.pack(pady=10, anchor='center')
+
+frame_input = tk.Frame(root, bg="grey")
+frame_input.pack(pady=5, anchor='w', fill='x')
+
+label_data = tk.Label(frame_input, text="Enter Data to Encode:", font=("Times New Roman", 14), bg="Grey", fg="Black")
+label_data.grid(row=0, column=0, padx=5, sticky='w')
+entry_data = tk.Entry(frame_input, width=30, font=("Times New Roman", 12))
+entry_data.grid(row=0, column=1, padx=5, sticky='w')
+
+frame_buttons = tk.Frame(root, bg="grey")
+frame_buttons.pack(pady=10, anchor='w', fill='x')
+
+btn_encode = tk.Button(frame_buttons, text="Encode", font=("Times New Roman", 14), bg="#ff6f61", command=encode)
+btn_encode.grid(row=0, column=0, padx=10)
+
+btn_decode = tk.Button(frame_buttons, text="Decode", font=("Times New Roman", 14), bg="#ff6f61", command=decode)
+btn_decode.grid(row=0, column=1, padx=30)
+
+btn_clear = tk.Button(frame_buttons, text="Clear", font=("Times New Roman", 14), bg="#ff6f61", command=clear_entries)
+btn_clear.grid(row=0, column=2, padx=30)
+
+frame_encoded = tk.Frame(root, bg="grey")
+frame_encoded.pack(pady=5, anchor='w', fill='x')
+
+label_encoded_data = tk.Label(frame_encoded, text="Encoded Data:", font=("Times New Roman", 14), bg="Grey", fg="Black")
+label_encoded_data.grid(row=0, column=0, padx=5, sticky='w')
+entry_encoded_data = scrolledtext.ScrolledText(frame_encoded, width=40, height=3, font=("Times New Roman", 12))
+entry_encoded_data.grid(row=0, column=1, padx=5, sticky='w')
+
+label_codebook = tk.Label(frame_encoded, text="Codebook:", font=("Times New Roman", 14), bg="Grey", fg="Black")
+label_codebook.grid(row=0, column=2, padx=5, sticky='w')
+entry_codebook = scrolledtext.ScrolledText(frame_encoded, width=40, height=3, font=("Times New Roman", 12))
+entry_codebook.grid(row=0, column=3, padx=5, sticky='w')
+
+frame_decode = tk.Frame(root, bg="grey")
+frame_decode.pack(pady=10, anchor='w', fill='x')
+
+label_decoded = tk.Label(frame_decode, text="Decoded Data:", font=("Times New Roman", 14), bg="Grey", fg="Black")
+label_decoded.pack(side=tk.LEFT, padx=5, anchor='w')
+entry_decoded_data = tk.Entry(frame_decode, width=50, font=("Times New Roman", 12))
+entry_decoded_data.pack(side=tk.LEFT, padx=5, anchor='w')
+
+label_tree = tk.Label(root, text="Huffman Tree:", font=("Times New Roman", 14), bg="Grey", fg="Black")
+label_tree.pack(pady=5, anchor='w')
+
+canvas = tk.Canvas(root, width=800, height=250, bg="white")
+canvas.pack(padx=10, pady=10, anchor='w')
+
+label_actual_size = tk.Label(root, text="Actual Size: N/A", font=("Times New Roman", 14), bg="Grey")
+label_actual_size.pack(side=tk.LEFT, padx=5, anchor='w')
+
+label_compressed_size = tk.Label(root, text="Compressed Size: N/A", font=("Times New Roman", 14), bg="Grey")
+label_compressed_size.pack(side=tk.LEFT, padx=5, anchor='w')
+
+root.mainloop()
