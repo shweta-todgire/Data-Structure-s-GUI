@@ -1,0 +1,214 @@
+## Python program for Interactive Graph GUI.
+
+import tkinter as tk
+from tkinter import messagebox
+import networkx as nx
+import random
+
+class GraphApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Graph Operations")
+        self.root.geometry("1200x800")
+        self.root.configure(bg="Grey")
+
+        # Header at the top of the window
+        self.header_label = tk.Label(self.root, text="SHWETA TODGIRE S120.\nGraph Operation", font=("Times New Roman", 20, "bold"), fg="White", bg="Grey")
+        self.header_label.pack(pady=10, anchor='n')
+
+        # Create a main frame to hold left and right sections
+        self.main_frame = tk.Frame(self.root, bg="Grey")
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Left section for input controls
+        self.left_frame = tk.Frame(self.main_frame, bg="Grey")
+        self.left_frame.grid(row=0, column=0, sticky="e", padx=10, pady=10)
+
+        # Right section for graph visualization
+        self.right_frame = tk.Frame(self.main_frame, bg="Grey")
+        self.right_frame.grid(row=0, column=1, sticky="e", padx=10, pady=10)
+
+        # Initialize graph and variables
+        self.graph = nx.Graph()
+        self.vertex_count = 0
+        self.edge_count = 0
+
+        # Number of Vertices
+        self.num_vertices_label = tk.Label(self.left_frame, text="Number of Vertices:", font=("Times New Roman", 14, "bold"), fg="black", bg="Grey")
+        self.num_vertices_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
+        self.num_vertices_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), fg="white", bg="black", width=20)
+        self.num_vertices_entry.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+
+        # Number of Edges
+        self.num_edges_label = tk.Label(self.left_frame, text="Number of Edges:", font=("Times New Roman", 14, "bold"), fg="black", bg="Grey")
+        self.num_edges_label.grid(row=2, column=0, padx=10, pady=5, sticky="e")
+        self.num_edges_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), fg="white", bg="black", width=20)
+        self.num_edges_entry.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+
+        # Set Limits Button
+        self.set_limits_button = tk.Button(self.left_frame, text="Set Limits", font=("Arial", 14), fg="white", bg="orange", command=self.set_limits)
+        self.set_limits_button.grid(row=1, column=2, rowspan=2, padx=10, pady=5)
+
+        # Vertex Input
+        self.vertex_label = tk.Label(self.left_frame, text="Vertex:", font=("Times New Roman", 14, "bold"), fg="black", bg="Grey")
+        self.vertex_label.grid(row=3, column=0, padx=10, pady=5, sticky="e")
+        self.vertex_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), fg="White", bg="black", width=20)
+        self.vertex_entry.grid(row=3, column=1, padx=10, pady=5, sticky="w")
+        self.add_vertex_button = tk.Button(self.left_frame, text="Add Vertex", font=("Arial", 14), fg="White", bg="Orange", command=self.add_vertex)
+        self.add_vertex_button.grid(row=4, column=0, padx=10, pady=5)
+        self.remove_vertex_button = tk.Button(self.left_frame, text="Remove Vertex", font=("Arial", 14), fg="White", bg="Orange", command=self.remove_vertex)
+        self.remove_vertex_button.grid(row=4, column=1, padx=10, pady=5)
+
+        # Edge Input
+        self.vertex1_label = tk.Label(self.left_frame, text="Vertex 1:", font=("Times New Roman", 14, "bold"), fg="black", bg="Grey")
+        self.vertex1_label.grid(row=5, column=0, padx=10, pady=5, sticky="e")
+        self.vertex1_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), fg="White", bg="black", width=20)
+        self.vertex1_entry.grid(row=5, column=1, padx=10, pady=5, sticky="w")
+        self.vertex2_label = tk.Label(self.left_frame, text="Vertex 2:", font=("Times New Roman", 14, "bold"), fg="black", bg="Grey")
+        self.vertex2_label.grid(row=6, column=0, padx=10, pady=5, sticky="e")
+        self.vertex2_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), fg="white", bg="black", width=20)
+        self.vertex2_entry.grid(row=6, column=1, padx=10, pady=5, sticky="w")
+        self.add_edge_button = tk.Button(self.left_frame, text="Add Edge", font=("Arial", 14), fg="white", bg="orange", command=self.add_edge)
+        self.add_edge_button.grid(row=7, column=0, padx=10, pady=5)
+        self.remove_edge_button = tk.Button(self.left_frame, text="Remove Edge", font=("Arial", 14), fg="white", bg="orange", command=self.remove_edge)
+        self.remove_edge_button.grid(row=7, column=1, padx=10, pady=5)
+
+        # Display Graph
+        self.display_button = tk.Button(self.left_frame, text="Display Graph", font=("Arial", 14), fg="white", bg="orange", command=self.display_graph)
+        self.display_button.grid(row=7, column=2, padx=10, pady=5)
+
+        # Output Text
+        self.output_frame = tk.Frame(self.left_frame, bg="Grey")
+        self.output_frame.grid(row=8, column=0, columnspan=6, padx=10, pady=10)
+        self.output_text = tk.Text(self.output_frame, height=10, width=50, font=("Times New Roman", 16), fg="white", bg="black")
+        self.output_text.pack(side=tk.LEFT, fill=tk.Y, expand=True)
+        self.scrollbar = tk.Scrollbar(self.output_frame, orient=tk.VERTICAL, command=self.output_text.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.output_text.config(yscrollcommand=self.scrollbar.set)
+
+        # Canvas for Drawing
+        self.draw_canvas = tk.Canvas(self.right_frame, bg="white", height=520, width=630)
+        self.draw_canvas.pack(pady=5, fill='both', expand=True)
+
+    def set_limits(self):
+        try:
+            self.vertex_count = int(self.num_vertices_entry.get())
+            self.edge_count = int(self.num_edges_entry.get())
+            if self.vertex_count < 0 or self.edge_count < 0:
+                raise ValueError("Negative numbers are not allowed.")
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, f"Limits set: {self.vertex_count} vertices, {self.edge_count} edges\n")
+            # Clear the entry boxes after setting limits
+            self.num_vertices_entry.delete(0, tk.END)
+            self.num_edges_entry.delete(0, tk.END)
+        except ValueError as e:
+            messagebox.showwarning("Input Error", f"Invalid input: {e}")
+
+    def add_vertex(self):
+        if self.vertex_count == 0:
+            messagebox.showwarning("Input Error", "Set the number of vertices first.")
+            return
+        
+        vertex = self.vertex_entry.get()
+        if vertex:
+            if len(self.graph.nodes) < self.vertex_count:
+                if not self.graph.has_node(vertex):
+                    self.graph.add_node(vertex)
+                    # Randomly place the vertex on the canvas
+                    x, y = self.random_position()
+                    self.graph.nodes[vertex]['pos'] = (x, y)
+                    self.draw_graph()
+                    self.output_text.insert(tk.END, f"Added vertex: {vertex}\n")
+                else:
+                    messagebox.showwarning("Input Error", "Vertex already exists.")
+            else:
+                messagebox.showwarning("Input Error", "Vertex limit reached.")
+            self.vertex_entry.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Input Error", "Please enter a vertex.")
+
+    def remove_vertex(self):
+        vertex = self.vertex_entry.get()
+        if vertex:
+            if self.graph.has_node(vertex):
+                self.graph.remove_node(vertex)
+                self.draw_graph()
+                self.output_text.insert(tk.END, f"Removed vertex: {vertex}\n")
+            else:
+                messagebox.showwarning("Input Error", "Vertex does not exist.")
+            self.vertex_entry.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Input Error", "Please enter a vertex.")
+
+    def add_edge(self):
+        if self.edge_count == 0:
+            messagebox.showwarning("Input Error", "Set the number of edges first.")
+            return
+        
+        vertex1 = self.vertex1_entry.get()
+        vertex2 = self.vertex2_entry.get()
+        if vertex1 and vertex2:
+            if self.graph.has_node(vertex1) and self.graph.has_node(vertex2):
+                if self.graph.number_of_edges() < self.edge_count:
+                    if not self.graph.has_edge(vertex1, vertex2):
+                        self.graph.add_edge(vertex1, vertex2)
+                        self.draw_graph()
+                        self.output_text.insert(tk.END, f"Added edge: {vertex1} - {vertex2}\n")
+                    else:
+                        messagebox.showwarning("Input Error", "Edge already exists.")
+                else:
+                    messagebox.showwarning("Input Error", "Edge limit reached.")
+            else:
+                messagebox.showwarning("Input Error", "One or both vertices not found.")
+            self.vertex1_entry.delete(0, tk.END)
+            self.vertex2_entry.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Input Error", "Please enter both vertices.")
+
+    def remove_edge(self):
+        vertex1 = self.vertex1_entry.get()
+        vertex2 = self.vertex2_entry.get()
+        if vertex1 and vertex2:
+            if self.graph.has_edge(vertex1, vertex2):
+                self.graph.remove_edge(vertex1, vertex2)
+                self.draw_graph()
+                self.output_text.insert(tk.END, f"Removed edge: {vertex1} - {vertex2}\n")
+            else:
+                messagebox.showwarning("Input Error", "Edge does not exist.")
+            self.vertex1_entry.delete(0, tk.END)
+            self.vertex2_entry.delete(0, tk.END)
+        else:
+            messagebox.showwarning("Input Error", "Please enter both vertices.")
+
+    def display_graph(self):
+        self.output_text.delete(1.0, tk.END)
+        self.output_text.insert(tk.END, "Graph:\n")
+        for vertex in self.graph.nodes:
+            edges = list(self.graph.neighbors(vertex))
+            self.output_text.insert(tk.END, f"{vertex}: {edges}\n")
+
+    def draw_graph(self):
+        self.draw_canvas.delete("all")
+        pos = nx.get_node_attributes(self.graph, 'pos')
+
+    # Draw edges
+        for edge in self.graph.edges:
+            x1, y1 = pos[edge[0]]
+            x2, y2 = pos[edge[1]]
+            self.draw_canvas.create_line(x1, y1, x2, y2, fill="black", width=2)
+
+    # Draw vertices
+        for vertex, (x, y) in pos.items():
+        # Use consistent dimensions for rectangles
+            self.draw_canvas.create_rectangle(x-20, y-20, x+20, y+20, fill="navy", outline="yellow")
+            self.draw_canvas.create_text(x, y, text=vertex, font=("Times New Roman", 14), fill='white')
+
+    def random_position(self):
+        x = random.randint(50, 650)
+        y = random.randint(50, 450)
+        return x, y
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = GraphApp(root)
+    root.mainloop()
