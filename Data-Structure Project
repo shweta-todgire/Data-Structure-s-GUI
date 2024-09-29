@@ -1,0 +1,2056 @@
+import tkinter as tk
+from tkinter import messagebox, scrolledtext
+from collections import Counter, deque, defaultdict
+import heapq
+import random
+import networkx as nx
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from itertools import permutations
+import math
+
+class MainApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Data Structures GUI")
+        self.master.geometry("600x600")
+        self.master.configure(bg='darkblue')
+
+        self.title_label = tk.Label(self.master, text="DATA STRUCTURE", font=("Times New Roman", 20, "bold"), bg='darkblue', fg='white').pack()
+
+        self.button_frame = tk.Frame(master, bg='darkblue')
+        self.button_frame.pack(side=tk.TOP, pady=10)
+
+
+        # Create buttons for each data structure
+        self.stack_button = tk.Button(self.button_frame, text="ADT with \n Stack", command=self.show_stack_gui, bg='lightgray' , height=2, width=10)
+        self.stack_button.pack(side=tk.LEFT, padx=5)
+
+        self.singly_ll_button = tk.Button(self.button_frame, text="Singly Linked \n List", command=self.show_singly_linked_list_gui, bg='lightgray', height=2, width=10)
+        self.singly_ll_button.pack(side=tk.LEFT, padx=5)
+
+        self.doubly_ll_button = tk.Button(self.button_frame, text="Doubly Linked \n List", command=self.show_doubly_linked_list_gui, bg='lightgray', height=2, width=10)
+        self.doubly_ll_button.pack(side=tk.LEFT, padx=5)
+
+        self.queue_button = tk.Button(self.button_frame, text="Queue", command=self.show_queue_gui, bg='lightgray', height=2, width=10)
+        self.queue_button.pack(side=tk.LEFT, padx=5)
+
+        self.pq_button = tk.Button(self.button_frame, text="Priority Queue", command=self.show_priority_queue_gui, bg='lightgray', height=2, width=10)
+        self.pq_button.pack(side=tk.LEFT, padx=5)
+
+        self.bt_button = tk.Button(self.button_frame, text="Binary Tree", command=self.show_binary_tree_gui, bg='lightgray', height=2, width=10)
+        self.bt_button.pack(side=tk.LEFT, padx=5)
+
+        self.bt_button = tk.Button(self.button_frame, text="Hauffman Tree", command=self.show_hauffman_tree_gui, bg='lightgray', height=2, width=10)
+        self.bt_button.pack(side=tk.LEFT, padx=5)
+
+        self.bt_button = tk.Button(self.button_frame, text="Graph", command=self.show_graph_gui, bg='lightgray', height=2, width=10)
+        self.bt_button.pack(side=tk.LEFT, padx=5)
+
+        self.bt_button = tk.Button(self.button_frame, text="BFS", command=self.show_bfs_gui, bg='lightgray', height=2, width=10)
+        self.bt_button.pack(side=tk.LEFT, padx=5)
+
+        self.bt_button = tk.Button(self.button_frame, text="DFS", command=self.show_dfs_gui, bg='lightgray', height=2, width=10)
+        self.bt_button.pack(side=tk.LEFT, padx=5)
+
+        self.bt_button = tk.Button(self.button_frame, text="Travelling \n Salesman", command=self.show_tsp_gui, bg='lightgray', height=2, width=10)
+        self.bt_button.pack(side=tk.LEFT, padx=5)
+
+        self.bt_button = tk.Button(self.button_frame, text="Hashing \n(Collision)", command=self.show_hashing_collision_gui, bg='lightgray', height=2, width=10)
+        self.bt_button.pack(side=tk.LEFT, padx=5)
+
+        self.bt_button = tk.Button(self.button_frame, text="Hashing (Non-\nCollision)", command=self.show_hashing_noncollision_gui, bg='lightgray', height=2, width=10)
+        self.bt_button.pack(side=tk.LEFT, padx=5)
+
+        # Frame to hold the operation interface
+        self.operation_frame = tk.Frame(master, bg='darkblue')
+        self.operation_frame.pack(pady=10)
+
+        self.current_gui = None  # To hold the current active GUI component
+
+    def clear_operation_frame(self):
+        for widget in self.operation_frame.winfo_children():
+            widget.destroy()
+
+    def show_stack_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = StackGUI(self.operation_frame)
+
+    def show_queue_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = QueueGUI(self.operation_frame)
+
+    def show_priority_queue_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = PriorityQueueGUI(self.operation_frame)
+
+    def show_singly_linked_list_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = LinkedListGUI(self.operation_frame)
+
+    def show_doubly_linked_list_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = DoublyLinkedListGUI(self.operation_frame)
+
+    def show_binary_tree_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = BinaryTreeGUI(self.operation_frame)
+
+    def show_hauffman_tree_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = HuffmanGUI(self.operation_frame)
+
+    def show_graph_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = GraphApp(self.operation_frame)
+
+    def show_bfs_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = BFSGUI(self.operation_frame)
+
+    def show_dfs_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = DFSGUI(self.operation_frame)
+
+    def show_tsp_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = TSPGUI(self.operation_frame)
+
+    def show_hashing_collision_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = HashCollisionGUI(self.operation_frame)
+
+    def show_hashing_noncollision_gui(self):
+        self.clear_operation_frame()
+        self.current_gui = HashNonCollisionGUI(self.operation_frame)
+
+# Stack class
+class Stack:
+    def __init__(self):
+        self.items = []
+
+    def push(self, item):
+        self.items.append(item)
+
+    def pop(self):
+        if self.is_empty():
+            return None
+        return self.items.pop()
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def display(self):
+        return self.items
+
+class StackGUI:
+    def __init__(self, master):
+        self.master = master
+        self.title_label = tk.Label(master, text="Abstract Data Type with Stack", font=("Times New Roman", 20, "bold"), bg='darkblue', fg='white')
+        self.title_label.pack(pady=10)
+
+        self.stack = Stack()
+
+        self.entry_label = tk.Label(master, text="Enter Element:", font=("Times New Roman", 14), bg='darkblue', fg='white')
+        self.entry_label.pack()
+
+        self.entry = tk.Entry(master)
+        self.entry.pack()
+
+        self.push_button = tk.Button(master, text="Push", command=self.push_element,  bg="light Blue", fg="black", font=("Times New Roman", 14))
+        self.push_button.pack(pady=5)
+
+        self.pop_button = tk.Button(master, text="Pop", command=self.pop_element,  bg="light Blue", fg="black", font=("Times New Roman", 14))
+        self.pop_button.pack(pady=5)
+
+        self.stack_display = tk.Text(master, height=10, width=40, font=("Times New Roman", 14), bg='lightgray')
+        self.stack_display.pack(pady=10)
+
+        self.message_label = tk.Label(master, text="", bg='darkblue', fg='white', font=("Times New Roman", 14))
+        self.message_label.pack()
+
+    def push_element(self):
+        element = self.entry.get()
+        if element:
+            self.stack.push(element)
+            self.entry.delete(0, tk.END)
+            self.update_display()
+            self.message_label.config(text=f"Pushed: {element}")
+        else:
+            self.message_label.config(text="Please enter a value to push.")
+
+    def pop_element(self):
+        if not self.stack.is_empty():
+            popped = self.stack.pop()
+            self.update_display()
+            self.message_label.config(text=f"Popped: {popped}")
+        else:
+            self.message_label.config(text="Stack is empty. Nothing to pop.")
+
+    def update_display(self):
+        self.stack_display.delete(1.0, tk.END)
+        for item in self.stack.display():
+            self.stack_display.insert(tk.END, str(item) + "\n")
+
+
+
+class SinglyNode:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class SinglyLinkedList:
+    def __init__(self):
+        self.head = None
+
+    def insert(self, data):
+        new_node = SinglyNode(data)
+        if not self.head:
+            self.head = new_node
+        else:
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = new_node
+
+    def delete(self, index):
+        if self.head is None:
+            return False        
+        temp = self.head
+        if index == 0:
+            self.head = temp.next
+            return True
+        for i in range(index - 1):
+            temp = temp.next
+            if temp is None:
+                return False
+        if temp is None or temp.next is None:
+            return False
+        
+        # Unlink the node from the linked list
+        next = temp.next.next
+        temp.next = None
+        temp.next = next
+        return True
+
+
+    def traverse(self):
+        elements = []
+        current = self.head
+        while current:
+            elements.append(current.data)
+            current = current.next
+        return elements
+
+class LinkedListGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.configure(bg='darkblue')
+
+        self.title_label = tk.Label(master, text="Singly Linked List", font=("Times New Roman", 20, "bold"), bg='darkblue', fg='white')
+        self.title_label.pack(pady=10)
+
+        self.linked_list = SinglyLinkedList()
+
+        self.entry_label = tk.Label(master, text="Enter Element:",font=("Times New Roman", 14), bg='darkblue', fg='white')
+        self.entry_label.pack()
+
+        self.entry = tk.Entry(master, font=("Times New Roman", 14), bg='lightgray', fg='black')
+        self.entry.pack()
+
+        self.insert_button = tk.Button(master, text="Insert", command=self.insert_node, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.insert_button.pack(pady=5)
+
+        self.delete_label = tk.Label(master, text="Delete Index:",font=("Times New Roman", 14), bg='darkblue', fg='white')
+        self.delete_label.pack()
+
+        self.delete_entry = tk.Entry(master, font=("Times New Roman", 14), bg='lightgray', fg='black')
+        self.delete_entry.pack()
+
+        self.delete_button = tk.Button(master, text="Delete", command=self.delete_node, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.delete_button.pack(pady=5)
+
+        self.traverse_button = tk.Button(master, text="Traverse", command=self.traverse_list, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.traverse_button.pack(pady=5)
+
+        self.output_label = tk.Label(master, text="List Contents: []", bg="darkblue", fg="white", font=("Times New Roman", 14))
+        self.output_label.pack(pady=10)
+
+    def insert_node(self):
+        value = self.entry.get()
+        if value:
+            self.linked_list.insert(value)
+            self.entry.delete(0, tk.END)
+            messagebox.showinfo("Success", f"Inserted {value}")
+            self.traverse_list()
+        else:
+            messagebox.showwarning("Input Error", "Please enter a value")
+
+    def delete_node(self):
+        index = self.delete_entry.get()
+        if index.isdigit():
+            success = self.linked_list.delete(int(index))
+            if success:
+                self.delete_entry.delete(0, tk.END)
+                messagebox.showinfo("Success", f"Deleted node at index {index}")
+                self.traverse_list()
+            else:
+                messagebox.showwarning("Error", "Invalid index or list is empty")
+        else:
+            messagebox.showwarning("Input Error", "Please enter a valid index")
+
+    def traverse_list(self):
+        elements = self.linked_list.traverse()
+        self.output_label.config(text=f"List Contents: {elements}")
+
+### Doubly Linked List
+class DoublyNode:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+class DoublyLinkedList:
+    def __init__(self):
+        self.head = None
+
+    def insert_at_beginning(self, data):
+        new_node = DoublyNode(data)
+        new_node.next = self.head
+        if self.head is not None:
+            self.head.prev = new_node
+        self.head = new_node
+
+    def insert_at_end(self, data):
+        new_node = DoublyNode(data)
+        if self.head is None:
+            self.head = new_node
+            return
+        last = self.head
+        while last.next:
+            last = last.next
+        last.next = new_node
+        new_node.prev = last
+
+    def delete_node(self, key):
+        temp = self.head
+        if temp is not None and temp.data == key:
+            self.head = temp.next
+            if self.head is not None:
+                self.head.prev = None
+            return
+        while temp:
+            if temp.data == key:
+                break
+            temp = temp.next
+        if temp is None:
+            return
+        if temp.next is not None:
+            temp.next.prev = temp.prev
+        if temp.prev is not None:
+            temp.prev.next = temp.next
+
+    def traverse(self):
+        nodes = []
+        current = self.head
+        while current:
+            nodes.append(current.data)
+            current = current.next
+        return nodes
+
+class DoublyLinkedListGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.configure(bg='darkblue')
+
+        self.title_label = tk.Label(master, text="Doubly Linked List", font=("Times New Roman", 20, "bold"), bg='darkblue', fg='white')
+        self.title_label.pack(pady=10)
+
+        self.doubly_linked_list = DoublyLinkedList()
+
+        self.entry_label = tk.Label(master, text="Enter Element:",font=("Times New Roman", 14), bg='darkblue', fg='white')
+        self.entry_label.pack()
+
+        self.entry = tk.Entry(master, font=("Times New Roman", 14), bg='lightgray', fg='black')
+        self.entry.pack()
+
+        self.insert_begin_button = tk.Button(master, text="Insert at Beginning", command=self.insert_at_beginning, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.insert_begin_button.pack(pady=5)
+
+        self.insert_end_button = tk.Button(master, text="Insert at End", command=self.insert_at_end, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.insert_end_button.pack(pady=5)
+
+        self.delete_label = tk.Label(master, text="Delete Element:", bg='darkblue', fg='white', font=("Times New Roman", 14))
+        self.delete_label.pack()
+
+        self.delete_entry = tk.Entry(master, font=("Times New Roman", 14), bg='lightgray', fg='black')
+        self.delete_entry.pack()
+
+        self.delete_button = tk.Button(master, text="Delete", command=self.delete_element, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.delete_button.pack(pady=5)
+
+        self.traverse_button = tk.Button(master, text="Traverse", command=self.traverse_list, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.traverse_button.pack(pady=5)
+
+        self.dll_display = tk.Text(master, height=10, width=40, bg='lightgray', font=("Times New Roman", 14))
+        self.dll_display.pack(pady=10)
+
+        self.message_label = tk.Label(master, text="", bg='darkblue', fg='white', font=("Times New Roman", 14))
+        self.message_label.pack()
+
+    def insert_at_beginning(self):
+        element = self.entry.get()
+        if element:
+            self.doubly_linked_list.insert_at_beginning(element)
+            self.entry.delete(0, tk.END)
+            self.update_display(f"Inserted {element} at the beginning.")
+        else:
+            messagebox.showwarning("Input Error", "Please enter a value")
+
+    def insert_at_end(self):
+        element = self.entry.get()
+        if element:
+            self.doubly_linked_list.insert_at_end(element)
+            self.entry.delete(0, tk.END)
+            self.update_display(f"Inserted {element} at the end.")
+        else:
+            messagebox.showwarning("Input Error", "Please enter a value")
+
+    def delete_element(self):
+        element = self.delete_entry.get()
+        if element:
+            self.doubly_linked_list.delete_node(element)
+            self.delete_entry.delete(0, tk.END)
+            self.update_display(f"Deleted {element}.")
+        else:
+            messagebox.showwarning("Input Error", "Please enter a value to delete")
+
+    def traverse_list(self):
+        elements = self.doubly_linked_list.traverse()
+        self.dll_display.delete(1.0, tk.END)
+        if elements:
+            self.dll_display.insert(tk.END, " <-> ".join(map(str, elements)))
+        else:
+            self.dll_display.insert(tk.END, "List is empty.")
+
+    def update_display(self, message):
+        self.dll_display.delete(1.0, tk.END)  # Clear the display
+        self.dll_display.insert(tk.END, message)  # Show the operation message
+
+        
+class Queue:
+    def __init__(self):
+        self.items = []
+        self.max_size = None
+
+    def set_size(self, size):
+        self.max_size = size
+
+    def enqueue(self, item):
+        if self.max_size is not None and len(self.items) >= self.max_size:
+            return False
+        self.items.append(item)
+        return True
+
+    def dequeue(self):
+        if self.is_empty():
+            return None
+        return self.items.pop(0)
+
+    def traverse(self):
+        return self.items.copy()
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def clear(self):
+        self.items.clear() 
+
+class QueueGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.configure(bg='darkblue')
+
+        self.title_label = tk.Label(master, text="Queue Operations", font=("Times New Roman", 20, "bold"), bg='darkblue', fg='white')
+        self.title_label.pack(pady=10)
+
+        self.queue = Queue()
+
+        self.size_label = tk.Label(master, text="Set Max Size (optional):", bg='darkblue', fg='white', font=("Times New Roman", 14))
+        self.size_label.pack()
+
+        self.size_entry = tk.Entry(master, font=("Times New Roman", 14), bg='lightgray', fg='black')
+        self.size_entry.pack()
+
+        self.set_size_button = tk.Button(master, text="Set Size", command=self.set_queue_size, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.set_size_button.pack(pady=5)
+
+        self.entry_label = tk.Label(master, text="Enter Element:", bg='darkblue', fg='white', font=("Times New Roman", 14))
+        self.entry_label.pack()
+
+        self.entry = tk.Entry(master, font=("Times New Roman", 14), bg='lightgray', fg='black')
+        self.entry.pack()
+
+        self.enqueue_button = tk.Button(master, text="Enqueue", command=self.enqueue_element, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.enqueue_button.pack(pady=5)
+
+        self.dequeue_button = tk.Button(master, text="Dequeue", command=self.dequeue_element, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.dequeue_button.pack(pady=5)
+
+        # Add a traverse button
+        self.traverse_button = tk.Button(master, text="Traverse", command=self.traverse_queue, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.traverse_button.pack(pady=5)
+
+        self.queue_display = tk.Text(master, height=5, width=40, bg='lightgray', font=("Times New Roman", 14))
+        self.queue_display.pack(pady=10)
+
+        self.message_label = tk.Label(master, text="", bg='darkblue', fg='white', font=("Times New Roman", 14))
+        self.message_label.pack()
+
+    def set_queue_size(self):
+        size = self.size_entry.get()
+        if size.isdigit() and int(size) > 0:
+            self.queue.set_size(int(size))
+            self.message_label.config(text="Queue size set successfully.")
+        else:
+            self.message_label.config(text="Invalid Input: Please enter a valid positive number.")
+
+    def enqueue_element(self):
+        element = self.entry.get()
+        if element:
+            if not self.queue.enqueue(element):
+                self.message_label.config(text="Queue is full.")
+            else:
+                self.entry.delete(0, tk.END)
+                self.update_display()
+                self.message_label.config(text=f"Enqueued: {element}")
+        else:
+            self.message_label.config(text="Please enter an element to enqueue.")
+
+    def dequeue_element(self):
+        if self.queue.is_empty():
+            self.message_label.config(text="Queue is empty. Nothing to dequeue.")
+        else:
+            dequeued = self.queue.dequeue()
+            self.update_display()
+            self.message_label.config(text=f"Dequeued: {dequeued}")
+
+    def traverse_queue(self):
+        elements = self.queue.traverse()
+        self.queue_display.delete(1.0, tk.END)  # Clear the display
+        if elements:
+            self.queue_display.insert(tk.END, "->".join(map(str, elements)))  # Show elements line by line
+        else:
+            self.queue_display.insert(tk.END, "Queue is empty.")
+
+    def update_display(self):
+        self.queue_display.delete(1.0, tk.END)
+        for item in self.queue.traverse():
+            self.queue_display.insert(tk.END, str(item) + "\n")
+
+            
+
+class PriorityQueue:
+    def __init__(self, size=0):
+        self.queue = []
+        self.size = size
+
+    def is_empty(self):
+        return len(self.queue) == 0
+
+    def is_full(self):
+        return len(self.queue) >= self.size
+
+    def enqueue(self, data, priority):
+        if self.size == 0:
+            return "Please set the queue size before enqueuing data"
+        if data.strip():
+            if self.is_full():
+                return "Queue is full"
+            elif any(p == priority for p, d in self.queue):
+                return "Priority already exists. Please enter a unique priority."
+            else:
+                self.queue.append((priority, data))
+                self.queue.sort(key=lambda x: x[0])  # Smallest priority to highest
+                return f"Enqueued: {data} with priority {priority}"
+        else:
+            return "Data cannot be empty"
+
+    def dequeue_lowest(self):
+        if not self.is_empty():
+            return self.queue.pop(0)[1]  # Remove first element (smallest priority)
+        else:
+            return "Priority queue is empty"
+
+    def dequeue_highest(self):
+        if not self.is_empty():
+            return self.queue.pop(-1)[1]  # Remove last element (highest priority)
+        else:
+            return "Priority queue is empty"
+
+    def traverse_lowest(self):
+        if not self.is_empty():
+            return [f"{data}, Priority: {priority}" for priority, data in self.queue]
+        else:
+            return ["Queue is empty"]
+
+    def traverse_highest(self):
+        if not self.is_empty():
+            return [f"{data}, Priority: {priority}" for priority, data in reversed(self.queue)]
+        else:
+            return ["Queue is empty"]
+
+    def clear_queue(self):
+        self.queue.clear()
+
+class PriorityQueueGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.configure(bg="darkblue")
+        self.priority_queue = PriorityQueue()
+
+        # Labels and entry widgets
+        self.title_label = tk.Label(master, text="Priority Queue Operations", font=("Times New Roman", 20, "bold"), bg="darkblue", fg="white")
+        self.title_label.grid(row=0, column=0, columnspan=3, padx=5, pady=5)
+
+        self.size_label = tk.Label(master, text="Queue Size:", bg="darkblue", fg="white", font=("Times New Roman", 14))
+        self.size_label.grid(row=1, column=0, padx=10, pady=10)
+        self.size_entry = tk.Entry(master, font=("Times New Roman", 14), bg="lightgray", fg="black")
+        self.size_entry.grid(row=1, column=1, padx=10, pady=10)
+        self.set_size_button = tk.Button(master, text="Set Size", command=self.set_size, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.set_size_button.grid(row=1, column=2, padx=10, pady=10)
+
+        self.data_label = tk.Label(master, text="Data:", bg="darkblue",fg="white", font=("Times New Roman", 14))
+        self.data_label.grid(row=2, column=0, padx=10, pady=10)
+        self.data_entry = tk.Entry(master, font=("Times New Roman", 14), bg="lightgray", fg="black")
+        self.data_entry.grid(row=2, column=1, padx=10, pady=10)
+
+        self.priority_label = tk.Label(master, text="Priority:", bg="darkblue", fg="white", font=("Times New Roman", 14))
+        self.priority_label.grid(row=3, column=0, padx=10, pady=10)
+        self.priority_entry = tk.Entry(master, font=("Times New Roman", 14), bg="lightgray", fg="black")
+        self.priority_entry.grid(row=3, column=1, padx=10, pady=10)
+
+        self.enqueue_button = tk.Button(master, text="Enqueue", command=self.enqueue, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.enqueue_button.grid(row=3, column=2, padx=10, pady=10)
+
+        self.dequeue_lowest_button = tk.Button(master, text="Dequeue Lowest", command=self.dequeue_lowest, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.dequeue_lowest_button.grid(row=4, column=0, padx=10, pady=10)
+
+        self.dequeue_highest_button = tk.Button(master, text="Dequeue Highest", command=self.dequeue_highest, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.dequeue_highest_button.grid(row=4, column=1, padx=10, pady=10)
+
+        self.traverse_lowest_button = tk.Button(master, text="Traverse Lowest", command=self.traverse_lowest, bg="lightblue", fg="black", font=("Times New Roman", 16))
+        self.traverse_lowest_button.grid(row=4, column=2, padx=10, pady=10)
+
+        self.traverse_highest_button = tk.Button(master, text="Traverse Highest", command=self.traverse_highest, bg="lightblue", fg="black", font=("Times New Roman", 16))
+        self.traverse_highest_button.grid(row=4, column=3, padx=10, pady=10)
+
+        self.clear_button = tk.Button(master, text="Clear Queue", command=self.clear_queue, bg="lightblue", fg="black", font=("Times New Roman", 14))
+        self.clear_button.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
+
+        self.output_text = tk.Text(master, height=10, width=50, bg="lightgray", fg="black", font=("Times New Roman", 14))
+        self.output_text.grid(row=6, column=0, columnspan=3, padx=10, pady=10)
+
+    def set_size(self):
+        size = self.size_entry.get()
+        if size.isdigit() and int(size) > 0:
+            self.priority_queue.size = int(size)
+            self.update_output(f"Queue size set to {size}.")
+            self.size_entry.delete(0, tk.END)
+        else:
+            self.update_output("Invalid Input: Please enter a valid positive size.")
+
+    def enqueue(self):
+        data = self.data_entry.get()
+        priority = self.priority_entry.get()
+        if not data:
+            self.update_output("Invalid Input: Data cannot be empty.")
+            return
+        if priority.isdigit():
+            result = self.priority_queue.enqueue(data, int(priority))
+            self.update_output(result)
+            if result.startswith("Enqueued"):
+                self.data_entry.delete(0, tk.END)
+                self.priority_entry.delete(0, tk.END)
+        else:
+            self.update_output("Invalid Input: Please enter a valid priority.")
+
+    def dequeue_lowest(self):
+        item = self.priority_queue.dequeue_lowest()
+        self.update_output(f"Dequeued (Lowest Priority): {item}")
+
+    def dequeue_highest(self):
+        item = self.priority_queue.dequeue_highest()
+        self.update_output(f"Dequeued (Highest Priority): {item}")
+
+    def traverse_lowest(self):
+        items = self.priority_queue.traverse_lowest()
+        self.update_output("Queue (Lowest to Highest Priority):\n" + "\n".join(items))
+
+    def traverse_highest(self):
+        items = self.priority_queue.traverse_highest()
+        self.update_output("Queue (Highest to Lowest Priority):\n" + "\n".join(items))
+
+
+
+    def clear_queue(self):
+        self.priority_queue.clear_queue()
+        self.update_output("Queue cleared.")
+
+    def update_output(self, message):
+        self.output_text.delete(1.0, tk.END)
+        self.output_text.insert(tk.END, message + "\n")
+
+        
+class BinaryTree:
+    class Node:
+        def __init__(self, key):
+            self.left = None
+            self.right = None
+            self.val = key
+
+    def __init__(self):
+        self.root = None
+
+    def insert(self, key):
+        if self.root is None:
+            self.root = self.Node(key)
+        else:
+            self._insert(self.root, key)
+
+    def _insert(self, root, key):
+        if key < root.val:
+            if root.left is None:
+                root.left = self.Node(key)
+            else:
+                self._insert(root.left, key)
+        else:
+            if root.right is None:
+                root.right = self.Node(key)
+            else:
+                self._insert(root.right, key)
+
+    def delete(self, key):
+        self.root = self._delete(self.root, key)
+
+    def _delete(self, root, key):
+        if root is None:
+            return root
+        if key < root.val:
+            root.left = self._delete(root.left, key)
+        elif key > root.val:
+            root.right = self._delete(root.right, key)
+        else:
+            if root.left is None:
+                return root.right
+            elif root.right is None:
+                return root.left
+            min_larger_node = self._get_min(root.right)
+            root.val = min_larger_node.val
+            root.right = self._delete(root.right, min_larger_node.val)
+        return root
+
+    def _get_min(self, node):
+        current = node
+        while current.left is not None:
+            current = current.left
+        return current
+
+    def inorder_traversal(self):
+        return self._inorder_traversal(self.root)
+
+    def _inorder_traversal(self, root):
+        res = []
+        if root:
+            res = self._inorder_traversal(root.left)
+            res.append(root.val)
+            res = res + self._inorder_traversal(root.right)
+        return res
+
+    def preorder_traversal(self):
+        return self._preorder_traversal(self.root)
+
+    def _preorder_traversal(self, root):
+        res = []
+        if root:
+            res.append(root.val)
+            res = res + self._preorder_traversal(root.left)
+            res = res + self._preorder_traversal(root.right)
+        return res
+
+    def postorder_traversal(self):
+        return self._postorder_traversal(self.root)
+
+    def _postorder_traversal(self, root):
+        res = []
+        if root:
+            res = self._postorder_traversal(root.left)
+            res = res + self._postorder_traversal(root.right)
+            res.append(root.val)
+        return res
+
+    def find_min(self):
+        return self._get_min(self.root).val if self.root else None
+
+    def find_max(self):
+        return self._get_max(self.root).val if self.root else None
+
+    def _get_max(self, node):
+        current = node
+        while current.right:
+            current = current.right
+        return current
+
+class BinaryTreeGUI:
+    def __init__(self, master):
+        self.tree = BinaryTree()
+        self.master = master
+        self.master.configure(bg="darkblue")
+
+        self.label = tk.Label(master, bg="darkblue", fg="white", text="Binary Tree Operations",
+                              font=("Times New Roman", 20, "bold"))
+        self.label.pack(pady=10)
+
+        self.create_entry_frame()
+        self.create_button_frame()
+        self.create_canvas()
+        self.create_message_area()
+
+    def create_entry_frame(self):
+        self.entry_frame = tk.Frame(self.master, bg="darkblue")
+        self.entry_frame.pack(pady=10)
+
+        label = tk.Label(self.entry_frame, bg="darkblue", fg="white", text="Enter a value:", font=("Times New Roman", 14))
+        label.grid(row=0, column=0, padx=10)
+
+        self.entry = tk.Entry(self.entry_frame, bg="white", fg="black", font=("Times New Roman", 14))
+        self.entry.grid(row=0, column=1, padx=10)
+
+    def create_button_frame(self):
+        self.button_frame = tk.Frame(self.master, bg="darkblue")
+        self.button_frame.pack(pady=10)
+
+        buttons = [
+            ("Insert", self.insert_value),
+            ("Delete", self.delete_value),
+            ("Inorder", self.show_inorder),
+            ("Preorder", self.show_preorder),
+            ("Postorder", self.show_postorder),
+            ("Find Min", self.find_min),
+            ("Find Max", self.find_max),
+            ("Clear Tree", self.clear_tree)
+        ]
+
+        for idx, (text, command) in enumerate(buttons):
+            button = tk.Button(self.button_frame, text=text, bg="lightblue", fg="black", font=("Times New Roman", 12), command=command)
+            button.grid(row=idx // 8, column=idx % 8, padx=20, pady=10)
+
+    def create_canvas(self):
+        self.canvas = tk.Canvas(self.master, width=600, height=280, bg='white')
+        self.canvas.pack(pady=10)
+
+    def create_message_area(self):
+        self.message_area = scrolledtext.ScrolledText(self.master, height=5, font=("Times New Roman", 12), bg="lightgrey")
+        self.message_area.pack(pady=10)
+
+    def insert_value(self):
+        self.handle_tree_operation(self.tree.insert, "Inserted")
+
+    def delete_value(self):
+        self.handle_tree_operation(self.tree.delete, "Deleted")
+
+    def handle_tree_operation(self, operation, action_message):
+        try:
+            value = int(self.entry.get())
+            operation(value)
+            self.message_area.insert(tk.END, f"{action_message} {value}\n")
+            self.draw_tree()
+        except ValueError:
+            self.message_area.insert(tk.END, "Error: Please enter a valid integer.\n")
+
+    def show_inorder(self):
+        self.show_traversal(self.tree.inorder_traversal, "Inorder Traversal")
+
+    def show_preorder(self):
+        self.show_traversal(self.tree.preorder_traversal, "Preorder Traversal")
+
+    def show_postorder(self):
+        self.show_traversal(self.tree.postorder_traversal, "Postorder Traversal")
+
+    def show_traversal(self, traversal_method, title):
+        result = traversal_method()
+        self.message_area.insert(tk.END, f"{title}: {result}\n")
+        self.draw_tree()
+
+    def find_min(self):
+        value = self.tree.find_min()
+        self.message_area.insert(tk.END, f"Minimum Value: {value if value is not None else 'Tree is empty.'}\n")
+
+    def find_max(self):
+        value = self.tree.find_max()
+        self.message_area.insert(tk.END, f"Maximum Value: {value if value is not None else 'Tree is empty.'}\n")
+
+    def clear_tree(self):
+        self.tree.root = None
+        self.canvas.delete("all")
+        self.message_area.insert(tk.END, "Tree has been cleared.\n")
+
+    def draw_tree(self):
+        self.canvas.delete("all")
+        if self.tree.root is not None:
+            self._draw_tree(self.tree.root, 300, 20, 100)
+
+    def _draw_tree(self, node, x, y, dx):
+        if node is None:
+            return
+        size = 20
+        self.canvas.create_rectangle(x - size, y - size, x + size, y + size, fill='black', outline='blue')
+        self.canvas.create_text(x, y, text=str(node.val), fill='white', font=("Times New Roman", 14))
+        if node.left is not None:
+            self.canvas.create_line(x, y, x - dx, y + 50, fill='black')
+            self._draw_tree(node.left, x - dx, y + 50, dx / 2)
+        if node.right is not None:
+            self.canvas.create_line(x, y, x + dx, y + 50, fill='black')
+            self._draw_tree(node.right, x + dx, y + 50, dx / 2)
+
+class HuffmanNode:
+    def __init__(self, char=None, freq=None):
+        self.char = char
+        self.freq = freq
+        self.left = None
+        self.right = None
+
+    def __lt__(self, other):
+        return self.freq < other.freq
+
+def build_huffman_tree(frequencies):
+    heap = [HuffmanNode(char, freq) for char, freq in frequencies.items()]
+    heapq.heapify(heap)
+    while len(heap) > 1:
+        left = heapq.heappop(heap)
+        right = heapq.heappop(heap)
+        merged = HuffmanNode(freq=left.freq + right.freq)
+        merged.left = left
+        merged.right = right
+        heapq.heappush(heap, merged)
+    return heap[0]
+
+def generate_codes(node, prefix="", codebook={}):
+    if node:
+        if node.char is not None:
+            codebook[node.char] = prefix
+        generate_codes(node.left, prefix + "0", codebook)
+        generate_codes(node.right, prefix + "1", codebook)
+    return codebook
+
+def huffman_encoding(data):
+    if not data:
+        return "", {}
+    frequencies = Counter(data)
+    root = build_huffman_tree(frequencies)
+    codebook = generate_codes(root)
+    encoded_data = ''.join(codebook[char] for char in data)
+    return encoded_data, codebook, root
+
+def huffman_decoding(encoded_data, codebook):
+    reverse_codebook = {v: k for k, v in codebook.items()}
+    decoded_data = ""
+    temp_code = ""
+    for bit in encoded_data:
+        temp_code += bit
+        if temp_code in reverse_codebook:
+            decoded_data += reverse_codebook[temp_code]
+            temp_code = ""
+    return decoded_data
+
+def visualize_tree(node, canvas, x=400, y=50, x_offset=200, y_offset=50):
+    if node:
+        # Draw the rectangle for the node
+        size = 20
+        canvas.create_rectangle(x - size, y - size, x + size, y + size, fill='black', outline='blue')
+        
+        # Draw the text inside the rectangle
+        text = f"{node.char} ({node.freq})" if node.char else f"({node.freq})"
+        canvas.create_text(x, y, text=text, fill='white', font=("Times New Roman", 12))
+        
+        # Draw the lines to child nodes
+        if node.left:
+            canvas.create_line(x, y + size, x - x_offset, y + y_offset)
+            visualize_tree(node.left, canvas, x - x_offset, y + y_offset, x_offset // 2, y_offset)
+        if node.right:
+            canvas.create_line(x, y + size, x + x_offset, y + y_offset)
+            visualize_tree(node.right, canvas, x + x_offset, y + y_offset, x_offset // 2, y_offset)
+
+
+class HuffmanGUI:
+    def __init__(self, parent):
+        self.frame = tk.Frame(parent, bg="darkblue")
+        self.frame.pack(padx=10, pady=10)
+
+        self.create_widgets()
+
+    def create_widgets(self):
+        label_header = tk.Label(self.frame, text="Huffman Encoder/Decoder", font=("Times New Roman", 20, "bold"), bg="darkblue", fg="white")
+        label_header.pack(pady=10, anchor='center')
+
+        self.create_input_frame()
+        self.create_output_frame()
+        self.create_tree_canvas()
+        self.create_size_labels()
+        self.label_output = tk.Label(self.frame, text="", font=("Times New Roman", 12), bg="darkblue", fg="white")
+        self.label_output.pack(pady=5, anchor='w')
+
+    def create_input_frame(self):
+        frame_input = tk.Frame(self.frame, bg="darkblue")
+        frame_input.pack(pady=5, anchor='w', fill='x')
+
+        label_data = tk.Label(frame_input, text="Enter Data to Encode:", font=("Times New Roman", 14), 
+                              bg="darkblue", fg="white")
+        label_data.grid(row=0, column=0, padx=5, sticky='w')
+
+        self.entry_data = tk.Entry(frame_input, width=30, font=("Times New Roman", 14))
+        self.entry_data.grid(row=0, column=1, padx=5, sticky='w')
+
+        btn_encode = tk.Button(frame_input, text="Encode", font=("Times New Roman", 14), 
+                               bg="lightblue", command=self.encode)
+        btn_encode.grid(row=0, column=2, padx=10)
+
+        btn_decode = tk.Button(frame_input, text="Decode", font=("Times New Roman", 14), 
+                               bg="lightblue", command=self.decode)
+        btn_decode.grid(row=0, column=3, padx=30)
+
+        btn_clear = tk.Button(frame_input, text="Clear", font=("Times New Roman", 14), 
+                              bg="lightblue", command=self.clear_entries)
+        btn_clear.grid(row=0, column=4, padx=30)
+
+    def create_output_frame(self):
+        frame_encoded = tk.Frame(self.frame, bg="darkblue")
+        frame_encoded.pack(pady=5, anchor='w', fill='x')
+
+        label_encoded_data = tk.Label(frame_encoded, text="Encoded Data:", font=("Times New Roman", 14), 
+                                       bg="darkblue", fg="white")
+        label_encoded_data.grid(row=0, column=0, padx=5, sticky='w')
+
+        self.entry_encoded_data = scrolledtext.ScrolledText(frame_encoded, width=40, height=2, font=("Times New Roman", 14))
+        self.entry_encoded_data.grid(row=0, column=1, padx=5, sticky='w')
+
+        label_codebook = tk.Label(frame_encoded, text="Codebook:", font=("Times New Roman", 14), 
+                                  bg="darkblue", fg="white")
+        label_codebook.grid(row=0, column=2, padx=5, sticky='w')
+
+        self.entry_codebook = scrolledtext.ScrolledText(frame_encoded, width=40, height=2, font=("Times New Roman", 14))
+        self.entry_codebook.grid(row=0, column=3, padx=5, sticky='w')
+
+        label_decoded_data = tk.Label(frame_encoded, text="Decoded Data:", font=("Times New Roman", 14), 
+                                       bg="darkblue", fg="white")
+        label_decoded_data.grid(row=1, column=0, padx=5, sticky='w')
+
+        self.entry_decoded_data = tk.Entry(frame_encoded, width=40, font=("Times New Roman", 14))
+        self.entry_decoded_data.grid(row=1, column=1, padx=5, sticky='w')
+
+    def create_tree_canvas(self):
+        label_tree = tk.Label(self.frame, text="Huffman Tree:", font=("Times New Roman", 14), 
+                              bg="darkblue", fg="white")
+        label_tree.pack(pady=5, anchor='w')
+
+        self.canvas = tk.Canvas(self.frame, width=800, height=230, bg="white")
+        self.canvas.pack(padx=10, pady=10, anchor='w')
+
+    def create_size_labels(self):
+        self.label_actual_size = tk.Label(self.frame, text="Actual Size: N/A", font=("Times New Roman", 12), 
+                                           bg="darkblue", fg="white")
+        self.label_actual_size.pack(anchor='w')
+
+        self.label_compressed_size = tk.Label(self.frame, text="Compressed Size: N/A", font=("Times New Roman", 12), 
+                                              bg="darkblue", fg="white")
+        self.label_compressed_size.pack(anchor='w')
+
+    def clear_entries(self):
+        self.entry_data.delete(0, tk.END)
+        self.entry_encoded_data.delete("1.0", tk.END)
+        self.entry_codebook.delete("1.0", tk.END)
+        self.entry_decoded_data.delete(0, tk.END)
+        self.label_output.config(text="")
+        self.canvas.delete("all")
+
+    def encode(self):
+        data = self.entry_data.get().strip()
+        if not data:
+            self.label_output.config(text="Input Error: Please enter some text to encode.")
+            return
+        encoded_data, codebook, root = huffman_encoding(data)
+        self.entry_encoded_data.delete("1.0", tk.END)
+        self.entry_encoded_data.insert(tk.END, encoded_data)
+        self.entry_codebook.delete("1.0", tk.END)
+        for char, code in codebook.items():
+            self.entry_codebook.insert(tk.END, f"'{char}': {code}\n")
+        visualize_tree(root, self.canvas)  # Pass canvas as an argument
+
+        actual_size = len(data) * 8  # Size in bits
+        compressed_size = len(encoded_data)  # Size in bits
+
+        # Update the size labels
+        self.label_actual_size.config(text=f"Actual Size: {actual_size} bits ({actual_size // 8} bytes)")
+        self.label_compressed_size.config(text=f"Compressed Size: {compressed_size} bits ({compressed_size // 8} bytes)")
+
+        self.label_output.config(text="Encoding successful.")
+
+    def decode(self):
+        encoded_data = self.entry_encoded_data.get("1.0", tk.END).strip()
+        codebook_text = self.entry_codebook.get("1.0", tk.END).strip()
+        if not encoded_data or not codebook_text:
+            self.label_output.config(text="Input Error: Please encode some text first.")
+            return
+        codebook = {}
+        for line in codebook_text.splitlines():
+            if ':' in line:
+                char, code = line.split(':')
+                codebook[char.strip().strip("'")] = code.strip()
+        decoded_data = huffman_decoding(encoded_data, codebook)
+        self.entry_decoded_data.delete(0, tk.END)
+        self.entry_decoded_data.insert(tk.END, decoded_data)
+        
+class GraphApp:
+    def __init__(self, master):
+        self.master = master
+
+        # Header at the top of the window
+        self.header_label = tk.Label(self.master, text="Graph Operation",
+                                     font=("Times New Roman", 20, "bold"), fg="white", bg="darkblue")
+        self.header_label.pack(pady=10, anchor='n')
+
+        # Create a main frame to hold left and right sections
+        self.main_frame = tk.Frame(self.master, bg="darkblue")
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Left section for input controls
+        self.left_frame = tk.Frame(self.main_frame, bg="darkblue")
+        self.left_frame.grid(row=0, column=0, sticky="e", padx=10, pady=10)
+
+        # Right section for graph visualization
+        self.right_frame = tk.Frame(self.main_frame, bg="darkblue")
+        self.right_frame.grid(row=0, column=1, sticky="e", padx=10, pady=10)
+
+        # Initialize graph and variables
+        self.graph = nx.Graph()
+        self.vertex_count = 0
+        self.edge_count = 0
+
+        # Number of Vertices
+        self.num_vertices_label = tk.Label(self.left_frame, text="Number of Vertices:", font=("Times New Roman", 14, "bold"), fg="white", bg="darkblue")
+        self.num_vertices_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
+        self.num_vertices_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), bg="white", fg="black", width=20)
+        self.num_vertices_entry.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+
+        # Number of Edges
+        self.num_edges_label = tk.Label(self.left_frame, text="Number of Edges:", font=("Times New Roman", 14, "bold"), fg="white", bg="darkblue")
+        self.num_edges_label.grid(row=2, column=0, padx=10, pady=5, sticky="e")
+        self.num_edges_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), bg="white", fg="black", width=20)
+        self.num_edges_entry.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+
+        # Set Limits Button
+        self.set_limits_button = tk.Button(self.left_frame, text="Set Limits", font=("Arial", 14), fg="black", bg="lightblue", command=self.set_limits)
+        self.set_limits_button.grid(row=1, column=2, rowspan=2, padx=10, pady=5)
+
+        # Vertex Input
+        self.vertex_label = tk.Label(self.left_frame, text="Vertex:", font=("Times New Roman", 14, "bold"), fg="white", bg="darkblue")
+        self.vertex_label.grid(row=3, column=0, padx=10, pady=5, sticky="e")
+        self.vertex_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), bg="white", fg="black", width=20)
+        self.vertex_entry.grid(row=3, column=1, padx=10, pady=5, sticky="w")
+        self.add_vertex_button = tk.Button(self.left_frame, text="Add Vertex", font=("Arial", 14), fg="black", bg="lightblue", command=self.add_vertex)
+        self.add_vertex_button.grid(row=4, column=0, padx=10, pady=5)
+        self.remove_vertex_button = tk.Button(self.left_frame, text="Remove Vertex", font=("Arial", 14), fg="black", bg="lightblue", command=self.remove_vertex)
+        self.remove_vertex_button.grid(row=4, column=1, padx=10, pady=5)
+
+        # Edge Input
+        self.vertex1_label = tk.Label(self.left_frame, text="Vertex 1:", font=("Times New Roman", 14, "bold"), fg="white", bg="darkblue")
+        self.vertex1_label.grid(row=5, column=0, padx=10, pady=5, sticky="e")
+        self.vertex1_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), bg="white", fg="black", width=20)
+        self.vertex1_entry.grid(row=5, column=1, padx=10, pady=5, sticky="w")
+        self.vertex2_label = tk.Label(self.left_frame, text="Vertex 2:", font=("Times New Roman", 14, "bold"), fg="white", bg="darkblue")
+        self.vertex2_label.grid(row=6, column=0, padx=10, pady=5, sticky="e")
+        self.vertex2_entry = tk.Entry(self.left_frame, font=("Times New Roman", 14), bg="white", fg="black", width=20)
+        self.vertex2_entry.grid(row=6, column=1, padx=10, pady=5, sticky="w")
+        self.add_edge_button = tk.Button(self.left_frame, text="Add Edge", font=("Arial", 14), fg="black", bg="lightblue", command=self.add_edge)
+        self.add_edge_button.grid(row=7, column=0, padx=10, pady=5)
+        self.remove_edge_button = tk.Button(self.left_frame, text="Remove Edge", font=("Arial", 14), fg="black", bg="lightblue", command=self.remove_edge)
+        self.remove_edge_button.grid(row=7, column=1, padx=10, pady=5)
+
+        # Display Graph
+        self.display_button = tk.Button(self.left_frame, text="Display Graph", font=("Arial", 14), fg="black", bg="lightblue", command=self.display_graph)
+        self.display_button.grid(row=7, column=2, padx=10, pady=5)
+
+        # Output Text
+        self.output_frame = tk.Frame(self.left_frame, bg="darkblue")
+        self.output_frame.grid(row=8, column=0, columnspan=6, padx=10, pady=10)
+        self.output_text = tk.Text(self.output_frame, height=10, width=50, font=("Times New Roman", 16), bg="white", fg="black")
+        self.output_text.pack(side=tk.LEFT, fill=tk.Y, expand=True)
+        self.scrollbar = tk.Scrollbar(self.output_frame, orient=tk.VERTICAL, command=self.output_text.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.output_text.config(yscrollcommand=self.scrollbar.set)
+
+        # Canvas for Drawing
+        self.draw_canvas = tk.Canvas(self.right_frame, bg="white", height=520, width=630)
+        self.draw_canvas.pack(pady=5, fill='both', expand=True)
+
+    def set_limits(self):
+        try:
+            self.vertex_count = int(self.num_vertices_entry.get())
+            self.edge_count = int(self.num_edges_entry.get())
+            if self.vertex_count < 0 or self.edge_count < 0:
+                raise ValueError("Negative numbers are not allowed.")
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, f"Limits set: {self.vertex_count} vertices, {self.edge_count} edges\n")
+            self.num_vertices_entry.delete(0, tk.END)
+            self.num_edges_entry.delete(0, tk.END)
+        except ValueError as e:
+            self.output_text.insert(tk.END, f"Input Error: Invalid input: {e}\n")
+
+    def add_vertex(self):
+        if self.vertex_count == 0:
+            self.output_text.insert(tk.END, "Input Error: Set the number of vertices first.\n")
+            return
+        vertex = self.vertex_entry.get()
+        if vertex:
+            if len(self.graph.nodes) < self.vertex_count:
+                if not self.graph.has_node(vertex):
+                    self.graph.add_node(vertex)
+                    # Randomly place the vertex on the canvas
+                    x, y = self.random_position()
+                    self.graph.nodes[vertex]['pos'] = (x, y)
+                    self.draw_graph()
+                    self.output_text.insert(tk.END, f"Added vertex: {vertex}\n")
+                else:
+                    self.output_text.insert(tk.END, "Input Error: Vertex already exists.\n")
+            else:
+                self.output_text.insert(tk.END, "Input Error: Vertex limit reached.\n")
+            self.vertex_entry.delete(0, tk.END)
+        else:
+            self.output_text.insert(tk.END, "Input Error: Please enter a vertex.\n")
+
+    def remove_vertex(self):
+        vertex = self.vertex_entry.get()
+        if vertex:
+            if self.graph.has_node(vertex):
+                self.graph.remove_node(vertex)
+                self.draw_graph()
+                self.output_text.insert(tk.END, f"Removed vertex: {vertex}\n")
+            else:
+                self.output_text.insert(tk.END, "Input Error: Vertex does not exist.\n")
+            self.vertex_entry.delete(0, tk.END)
+        else:
+            self.output_text.insert(tk.END, "Input Error: Please enter a vertex.\n")
+
+    def add_edge(self):
+        if self.edge_count == 0:
+            self.output_text.insert(tk.END, "Input Error: Set the number of edges first.\n")
+            return
+        vertex1 = self.vertex1_entry.get()
+        vertex2 = self.vertex2_entry.get()
+        if vertex1 and vertex2:
+            if len(self.graph.edges) < self.edge_count:
+                if self.graph.has_node(vertex1) and self.graph.has_node(vertex2):
+                    if not self.graph.has_edge(vertex1, vertex2):
+                        self.graph.add_edge(vertex1, vertex2)
+                        self.draw_graph()
+                        self.output_text.insert(tk.END, f"Added edge between {vertex1} and {vertex2}\n")
+                    else:
+                        self.output_text.insert(tk.END, "Input Error: Edge already exists.\n")
+                else:
+                    self.output_text.insert(tk.END, "Input Error: One or both vertices do not exist.\n")
+            else:
+                self.output_text.insert(tk.END, "Input Error: Edge limit reached.\n")
+            self.vertex1_entry.delete(0, tk.END)
+            self.vertex2_entry.delete(0, tk.END)
+        else:
+            self.output_text.insert(tk.END, "Input Error: Please enter both vertices.\n")
+
+    def remove_edge(self):
+        vertex1 = self.vertex1_entry.get()
+        vertex2 = self.vertex2_entry.get()
+        if vertex1 and vertex2:
+            if self.graph.has_edge(vertex1, vertex2):
+                self.graph.remove_edge(vertex1, vertex2)
+                self.draw_graph()
+                self.output_text.insert(tk.END, f"Removed edge between {vertex1} and {vertex2}\n")
+            else:
+                self.output_text.insert(tk.END, "Input Error: Edge does not exist.\n")
+            self.vertex1_entry.delete(0, tk.END)
+            self.vertex2_entry.delete(0, tk.END)
+        else:
+            self.output_text.insert(tk.END, "Input Error: Please enter both vertices.\n")
+
+    def display_graph(self):
+        self.output_text.delete(1.0, tk.END)
+        self.output_text.insert(tk.END, f"Nodes: {list(self.graph.nodes)}\n")
+        self.output_text.insert(tk.END, f"Edges: {list(self.graph.edges)}\n")
+
+    def random_position(self):
+        return random.randint(50, 580), random.randint(50, 480)
+
+    def draw_graph(self):
+        self.draw_canvas.delete("all")
+        pos = nx.get_node_attributes(self.graph, 'pos')
+        for node, (x, y) in pos.items():
+            self.draw_canvas.create_oval(x-30, y-30, x+30, y+30, fill='light blue')
+            self.draw_canvas.create_text(x, y, text=node, fill='black')
+
+        for edge in self.graph.edges:
+            x1, y1 = pos[edge[0]]
+            x2, y2 = pos[edge[1]]
+            self.draw_canvas.create_line(x1, y1, x2, y2)
+            
+class BFS:
+    def __init__(self):
+        self.graph = defaultdict(list)
+
+    def add_vertex(self, vertex):
+        if vertex not in self.graph:
+            self.graph[vertex] = []
+
+    def add_edge(self, vertex1, vertex2):
+        if vertex1 in self.graph and vertex2 in self.graph:
+            self.graph[vertex1].append(vertex2)
+            self.graph[vertex2].append(vertex1)
+
+    def bfs_tree(self, start):
+        visited = set()
+        bfs_tree = defaultdict(list)
+        queue = deque([start])
+        visited.add(start)
+        
+        while queue:
+            current = queue.popleft()
+            for neighbor in self.graph[current]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    bfs_tree[current].append(neighbor)
+                    queue.append(neighbor)
+        
+        return bfs_tree
+
+    def visualize(self, bfs_tree=None):
+        G = nx.Graph(self.graph)
+        if bfs_tree:
+            # Draw the BFS Tree
+            T = nx.DiGraph(bfs_tree)
+            pos_tree = nx.spring_layout(T)
+            fig, ax = plt.subplots(figsize=(8, 6))
+            nx.draw(T, pos_tree, with_labels=True, node_color='pink', edge_color='blue',
+                    node_size=1000, font_size=12, font_color='black', arrows=True, ax=ax)
+            ax.set_title("BFS Tree")
+        else:
+            # Draw the original graph
+            pos = nx.spring_layout(G)
+            fig, ax = plt.subplots(figsize=(8, 6))
+            nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='black',
+                    node_size=1000, font_size=12, font_color='black', ax=ax)
+            ax.set_title("Graph")
+        
+        return fig
+
+class BFSGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.configure(bg="darkblue")
+
+        # Title Label
+        self.title_label = tk.Label(master, text="Breadth First Tree", fg="white", bg="darkblue", font=("Times New Roman", 20, "bold"))
+        self.title_label.grid(row=0, column=0, columnspan=2, pady=10)
+
+        self.graph = BFS()
+
+        # Create frames for layout
+        self.left_frame = tk.Frame(master, bg="darkblue")
+        self.left_frame.grid(row=1, column=0, sticky="nsew")
+
+        self.right_frame = tk.Frame(master, bg="darkblue")
+        self.right_frame.grid(row=1, column=1, sticky="nsew")
+
+        # Vertex and Edge Entry
+        self.vertex_label = tk.Label(self.left_frame, text="Vertex:", fg="white", bg="darkblue", font=("Times New Roman", 14))
+        self.vertex_label.grid(row=1, column=0, pady=5)
+
+        self.vertex_entry = tk.Entry(self.left_frame,  bg="white", fg="black", font=("Times New Roman", 14))
+        self.vertex_entry.grid(row=1, column=1, pady=5)
+
+        self.add_vertex_button = tk.Button(self.left_frame, text="Add Vertex", bg="lightblue", fg="black", font=("Times New Roman", 14), command=self.add_vertex)
+        self.add_vertex_button.grid(row=1, column=2, pady=5)
+
+        self.edge_label = tk.Label(self.left_frame, text="Edge (vertex1 vertex2):", fg="white", bg="darkblue", font=("Times New Roman", 14))
+        self.edge_label.grid(row=2, column=0, pady=5)
+
+        self.edge_entry = tk.Entry(self.left_frame, bg="white", fg="black", font=("Times New Roman", 14))
+        self.edge_entry.grid(row=2, column=1, pady=5)
+
+        self.add_edge_button = tk.Button(self.left_frame, text="Add Edge", fg="black", bg="lightblue", font=("Times New Roman", 14), command=self.add_edge)
+        self.add_edge_button.grid(row=2, column=2, pady=5)
+
+        # Start BFS Entry
+        self.bfs_label = tk.Label(self.left_frame, text="Start Vertex for BFS:", fg="white", bg="darkblue", font=("Times New Roman", 14))
+        self.bfs_label.grid(row=3, column=0, pady=5)
+
+        self.bfs_entry = tk.Entry(self.left_frame, bg="white", fg="black", font=("Times New Roman", 14))
+        self.bfs_entry.grid(row=3, column=1, pady=5)
+
+        # Buttons to show graph and BFS graph
+        self.show_graph_button = tk.Button(self.left_frame, text="Show Graph", fg="black", bg="lightblue", font=("Times New Roman", 14), command=self.show_graph)
+        self.show_graph_button.grid(row=4, column=1, pady=10)
+
+        self.show_bfs_button = tk.Button(self.left_frame, text="Show BFS Graph", fg="black", bg="lightblue", font=("Times New Roman", 14), command=self.show_bfs)
+        self.show_bfs_button.grid(row=4, column=2, pady=10)
+
+        # Canvas for matplotlib graph visualization
+        self.canvas = None
+
+        # Text area for displaying messages
+        self.message_area = scrolledtext.ScrolledText(self.left_frame, height=5, width=40, fg="navy", bg="white", font=("Times New Roman", 14))
+        self.message_area.grid(row=5, column=0, columnspan=3, pady=10)
+
+    def add_vertex(self):
+        vertex = self.vertex_entry.get()
+        if vertex:
+            self.graph.add_vertex(vertex)
+            self.vertex_entry.delete(0, tk.END)
+            self.message_area.insert(tk.END, f"Vertex '{vertex}' added.\n")
+        else:
+            self.message_area.insert(tk.END, "Error: Please enter a valid vertex.\n")
+
+    def add_edge(self):
+        edge = self.edge_entry.get().split()
+        if len(edge) == 2:
+            vertex1, vertex2 = edge
+            self.graph.add_edge(vertex1, vertex2)
+            self.edge_entry.delete(0, tk.END)
+            self.message_area.insert(tk.END, f"Edge '{vertex1} - {vertex2}' added.\n")
+        else:
+            self.message_area.insert(tk.END, "Error: Please enter two valid vertices.\n")
+
+    def show_graph(self):
+        fig = self.graph.visualize()  # No bfs_tree parameter
+        if self.canvas:
+            self.canvas.get_tk_widget().destroy()
+        self.canvas = FigureCanvasTkAgg(fig, master=self.right_frame)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self.message_area.insert(tk.END, "Graph displayed.\n")
+
+    def show_bfs(self):
+        start_vertex = self.bfs_entry.get()
+        if start_vertex:
+            bfs_tree = self.graph.bfs_tree(start_vertex)
+            fig = self.graph.visualize(bfs_tree)  # Pass bfs_tree to visualize
+            if self.canvas:
+                self.canvas.get_tk_widget().destroy()
+            self.canvas = FigureCanvasTkAgg(fig, master=self.right_frame)
+            self.canvas.draw()
+            self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            self.message_area.insert(tk.END, f"BFS from vertex '{start_vertex}' displayed.\n")
+        else:
+            self.message_area.insert(tk.END, "Error: Please enter a start vertex for BFS.")
+
+
+class DFS:
+    def __init__(self):
+        self.graph = defaultdict(list)
+
+    def add_vertex(self, vertex):
+        if vertex not in self.graph:
+            self.graph[vertex] = []
+
+    def add_edge(self, vertex1, vertex2):
+        if vertex1 in self.graph and vertex2 in self.graph:
+            self.graph[vertex1].append(vertex2)
+            self.graph[vertex2].append(vertex1)
+
+    def dfs_tree(self, start):
+        """Perform DFS and return the Depth-First Tree as a dictionary."""
+        visited = set()
+        dfs_tree = defaultdict(list)
+
+        def dfs(v):
+            visited.add(v)
+            for neighbor in self.graph[v]:
+                if neighbor not in visited:
+                    dfs_tree[v].append(neighbor)
+                    dfs(neighbor)
+
+        dfs(start)
+        return dfs_tree
+
+    def visualize(self, dfs_tree=None):
+        G = nx.Graph(self.graph)
+        if dfs_tree:
+            # Draw the DFS Tree
+            T = nx.DiGraph(dfs_tree)
+            pos_tree = nx.spring_layout(T)
+            fig, ax = plt.subplots(figsize=(8, 6))
+            nx.draw(T, pos_tree, with_labels=True, node_color='navy', edge_color='blue',
+                    node_size=1000, font_size=12, font_color='orange', arrows=True, ax=ax)
+            ax.set_title("DFS Tree")
+        else:
+            # Draw the original graph
+            pos = nx.spring_layout(G)
+            fig, ax = plt.subplots(figsize=(8, 6))
+            nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='black',
+                    node_size=1000, font_size=12, font_color='black', ax=ax)
+            ax.set_title("Graph")
+        return fig
+
+
+
+class DFSGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.configure(bg="darkblue")
+
+        # Title Label
+        self.title_label = tk.Label(master, text="Depth First Tree", fg="white", bg="darkblue", font=("Times New Roman", 20, "bold"))
+        self.title_label.grid(row=0, column=0, columnspan=2, pady=10)
+
+        self.graph = DFS()
+
+        # Create frames for layout
+        self.left_frame = tk.Frame(master, bg="darkblue")
+        self.left_frame.grid(row=1, column=0, sticky="nsew")
+        self.right_frame = tk.Frame(master, bg="darkblue")
+        self.right_frame.grid(row=1, column=1, sticky="nsew")
+
+        # Vertex and Edge Entry
+        self.vertex_label = tk.Label(self.left_frame, text="Vertex:", fg="white", bg="darkblue", font=("Times New Roman", 14))
+        self.vertex_label.grid(row=1, column=0, pady=5)
+        self.vertex_entry = tk.Entry(self.left_frame, bg="white", fg="black", font=("Times New Roman", 14))
+        self.vertex_entry.grid(row=1, column=1, pady=5)
+
+        self.add_vertex_button = tk.Button(self.left_frame, text="Add Vertex", bg="lightblue", fg="black", font=("Times New Roman", 14), command=self.add_vertex)
+        self.add_vertex_button.grid(row=1, column=2, pady=5)
+
+        self.edge_label = tk.Label(self.left_frame, text="Edge (vertex1 vertex2):", fg="white", bg="darkblue", font=("Times New Roman", 14))
+        self.edge_label.grid(row=2, column=0, pady=5)
+        self.edge_entry = tk.Entry(self.left_frame, bg="white", fg="black", font=("Times New Roman", 14))
+        self.edge_entry.grid(row=2, column=1, pady=5)
+
+        self.add_edge_button = tk.Button(self.left_frame, text="Add Edge", fg="black", bg="lightblue", font=("Times New Roman", 14), command=self.add_edge)
+        self.add_edge_button.grid(row=2, column=2, pady=5)
+
+        # Start DFS Entry
+        self.dfs_label = tk.Label(self.left_frame, text="Start Vertex for DFS:", fg="white", bg="darkblue", font=("Times New Roman", 14))
+        self.dfs_label.grid(row=3, column=0, pady=5)
+        self.dfs_entry = tk.Entry(self.left_frame, bg="white", fg="black", font=("Times New Roman", 14))
+        self.dfs_entry.grid(row=3, column=1, pady=5)
+
+        # Buttons to show graph and DFS graph
+        self.show_graph_button = tk.Button(self.left_frame, text="Show Graph", fg="black", bg="lightblue", font=("Times New Roman", 14), command=self.show_graph)
+        self.show_graph_button.grid(row=4, column=1, pady=10)
+
+        self.show_dfs_button = tk.Button(self.left_frame, text="Show DFS Graph", fg="black", bg="lightblue", font=("Times New Roman", 14), command=self.show_dfs)
+        self.show_dfs_button.grid(row=4, column=2, pady=10)
+
+        # Canvas for matplotlib graph visualization
+        self.canvas = None
+
+        # Text area for displaying messages
+        self.message_area = scrolledtext.ScrolledText(self.left_frame, height=5, width=40, fg="navy", bg="white", font=("Times New Roman", 14))
+        self.message_area.grid(row=5, column=0, columnspan=3, pady=10)
+
+    def add_vertex(self):
+        vertex = self.vertex_entry.get()
+        if vertex:
+            self.graph.add_vertex(vertex)
+            self.vertex_entry.delete(0, tk.END)
+            self.message_area.insert(tk.END, f"Vertex '{vertex}' added.\n")
+        else:
+            self.message_area.insert(tk.END, "Error: Please enter a valid vertex.\n")
+
+    def add_edge(self):
+        edge = self.edge_entry.get().split()
+        if len(edge) == 2:
+            vertex1, vertex2 = edge
+            self.graph.add_edge(vertex1, vertex2)
+            self.edge_entry.delete(0, tk.END)
+            self.message_area.insert(tk.END, f"Edge '{vertex1} - {vertex2}' added.\n")
+        else:
+            self.message_area.insert(tk.END, "Error: Please enter two valid vertices.\n")
+
+    def show_graph(self):
+        fig = self.graph.visualize()  # No dfs_tree parameter
+        if self.canvas:
+            self.canvas.get_tk_widget().destroy()
+        self.canvas = FigureCanvasTkAgg(fig, master=self.right_frame)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self.message_area.insert(tk.END, "Graph displayed.\n")
+
+    def show_dfs(self):
+        start_vertex = self.dfs_entry.get()
+        if start_vertex:
+            dfs_tree = self.graph.dfs_tree(start_vertex)
+            fig = self.graph.visualize(dfs_tree)  # Pass dfs_tree to visualize
+            if self.canvas:
+                self.canvas.get_tk_widget().destroy()
+            self.canvas = FigureCanvasTkAgg(fig, master=self.right_frame)
+            self.canvas.draw()
+            self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            self.message_area.insert(tk.END, f"DFS from vertex '{start_vertex}' displayed.\n")
+        else:
+            self.message_area.insert(tk.END, "Error: Please enter a start vertex for DFS.\n")
+
+
+class TSP:
+    def __init__(self, distance_matrix, forts):
+        self.distance_matrix = distance_matrix
+        self.num_cities = len(distance_matrix)
+        self.forts = forts
+
+    def calculate_total_distance(self, route):
+        """Calculate the total distance of a given route."""
+        total_distance = 0
+        for i in range(len(route) - 1):
+            total_distance += self.distance_matrix[route[i]][route[i + 1]]
+        # Add distance to return to the starting city
+        total_distance += self.distance_matrix[route[-1]][route[0]]
+        return total_distance
+
+    def solve(self):
+        """Solve the TSP using brute force."""
+        min_distance = math.inf
+        best_route = None
+        # Generate all possible permutations of cities
+        for perm in permutations(range(self.num_cities)):
+            current_distance = self.calculate_total_distance(perm)
+            if current_distance < min_distance:
+                min_distance = current_distance
+                best_route = perm
+        return best_route, min_distance
+
+class TSPGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.configure(bg="darkblue")
+        
+        # Configure grid layout
+        self.master.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
+        self.master.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
+        
+        # Title and labels
+        tk.Label(master, text="Travelling Salesman Problem", font=('Times New Roman', 20, "bold"), fg="white", bg='darkblue').grid(row=0, column=2, columnspan=2, pady=20, sticky='w')
+        
+        # Input for list of places (forts)
+        tk.Label(master, text="Places (comma-separated):", font=('Times New Roman', 14), fg="white", bg='darkblue').grid(row=2, column=1, pady=20, sticky='w')
+        self.forts_entry = tk.Entry(master, width=50, font=("Arial", 14), fg="black", bg="white")
+        self.forts_entry.grid(row=2, column=2, columnspan=2)
+        
+        # Input for distance matrix
+        tk.Label(master, text="Distance matrix (comma-separated values, \nrows separated by semicolons):", font=('Times New Roman', 14), fg="white", bg='darkblue').grid(row=3, column=1, pady=20, sticky='w')
+        self.matrix_entry = tk.Entry(master, width=50, font=("Arial", 14), bg="white", fg="black")
+        self.matrix_entry.grid(row=3, column=2, columnspan=2, pady=20)
+        
+        # Solve button
+        self.solve_button = tk.Button(master, text="Solve TSP", command=self.solve_tsp, font=('Times New Roman', 14), fg="black", bg='lightblue')
+        self.solve_button.grid(row=4, column=1, columnspan=1)
+
+        # Placeholder for result label
+        self.result_label = tk.Label(master, text="", font=('Times New Roman', 14), fg="white", bg='darkblue')
+        self.result_label.grid(row=6, column=1, columnspan=4, sticky='w')
+
+        # Error message label
+        self.error_label = tk.Label(master, text="", font=('Times New Roman', 14), fg="red", bg='darkblue')
+        self.error_label.grid(row=5, column=1, columnspan=4, sticky='w')
+
+    def solve_tsp(self):
+        """Handle solving the TSP and displaying the result."""
+        self.error_label.config(text="")  # Clear previous error messages
+        forts = self.forts_entry.get().split(',')
+        forts = [fort.strip() for fort in forts if fort.strip()]
+        num_forts = len(forts)
+
+        # Get distance matrix input
+        matrix_input = self.matrix_entry.get()
+        try:
+            # Convert the input into a 2D list (matrix) with floating-point numbers
+            distance_matrix = [
+                [float(x) for x in row.split(',')]
+                for row in matrix_input.split(';')
+            ]
+            
+            # Check if the matrix is valid (square matrix)
+            if len(distance_matrix) != num_forts or any(len(row) != num_forts for row in distance_matrix):
+                raise ValueError
+        except ValueError:
+            self.error_label.config(text="Please enter a valid matrix. Rows separated by semicolons, values by commas.")
+            return
+
+        # Solve TSP
+        tsp = TSP(distance_matrix, forts)
+        best_route, min_distance = tsp.solve()
+
+        # Display result
+        route_str = " -> ".join([forts[i] for i in best_route])
+        self.result_label.config(text=f"Optimal Route: {route_str}\nTotal Distance: {min_distance:.2f}")
+
+        # Visualize the route in a new window
+        self.visualize_graph(best_route, distance_matrix, forts, min_distance)
+
+    def visualize_graph(self, route, distance_matrix, forts, min_distance):
+        """Visualize the TSP route using matplotlib and networkx in a new window."""
+        graph_window = tk.Toplevel(self.master)
+        graph_window.title("TSP Route Visualization")
+        
+        figure = plt.Figure(figsize=(5, 5), dpi=100)
+        canvas = FigureCanvasTkAgg(figure, graph_window)
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        
+        ax = figure.add_subplot(111)
+        G = nx.Graph()
+
+        # Add nodes (forts)
+        for i, fort in enumerate(forts):
+            G.add_node(i, label=fort)
+
+        # Add edges based on the route
+        for i in range(len(route) - 1):
+            G.add_edge(route[i], route[i + 1], weight=distance_matrix[route[i]][route[i + 1]])
+        
+        # Add the edge from the last node back to the first to complete the loop
+        G.add_edge(route[-1], route[0], weight=distance_matrix[route[-1]][route[0]])
+
+        # Get node positions in a circular layout
+        pos = nx.circular_layout(G)
+
+        # Draw nodes and edges
+        nx.draw_networkx_nodes(G, pos, node_size=700, node_color='lightblue', ax=ax)
+        nx.draw_networkx_edges(G, pos, edgelist=G.edges(), width=2, edge_color='gray', ax=ax)
+
+        # Label edges with distances
+        edge_labels = {(u, v): f"{G[u][v]['weight']}" for u, v in G.edges()}
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, ax=ax)
+
+        # Label the forts
+        nx.draw_networkx_labels(G, pos, labels={i: fort for i, fort in enumerate(forts)}, font_size=12, ax=ax)
+
+        # Show total distance in the plot title
+        ax.set_title(f"Optimal TSP Route (Total Distance: {min_distance:.2f})")
+        ax.axis('off')
+        canvas.draw()
+
+
+class HashTableNonCollision:
+    def __init__(self, size):
+        """Initialize the hash table with a given size."""
+        self.size = size
+        self.table = [None] * size
+
+    def hash_function(self, key):
+        """Hash function to determine the index for a given character key (using ASCII value)."""
+        return ord(key) % self.size
+
+    def insert(self, key, value):
+        """Insert a key-value pair into the hash table."""
+        index = self.hash_function(key)
+        self.table[index] = (key, value)
+
+    def delete(self, key):
+        """Delete the value associated with the given character key."""
+        index = self.hash_function(key)
+        if self.table[index] and self.table[index][0] == key:
+            self.table[index] = None
+
+    def search(self, key):
+        """Search for the value associated with the given character key."""
+        index = self.hash_function(key)
+        if self.table[index] and self.table[index][0] == key:
+            return self.table[index][1]
+        return None
+
+    def traverse(self):
+        """Traverse and return all key-value pairs in the hash table."""
+        result = []
+        for index, item in enumerate(self.table):
+            if item is not None:
+                key, value = item
+                result.append(f"Index {index}: Key {key}, Value {value}")
+        return result
+
+class HashNonCollisionGUI:
+    def __init__(self, master):
+        self.hash_table = HashTableNonCollision(size=10)
+        self.master = master
+
+        # Frame inside the main window
+        self.frame = tk.Frame(self.master, bg="darkblue")
+        self.frame.pack(fill=tk.BOTH, expand=True)
+
+        # Initialize hash table and widgets
+        self.init_widgets()
+
+    def init_widgets(self):
+        # Main label
+        self.label = tk.Label(self.frame, text="Hash Table (Non-Collision)", font=("Times New Roman", 20, "bold"), fg="white", bg="darkblue")
+        self.label.grid(row=0, column=0, columnspan=4, pady=10)
+
+        # Key and Value Input
+        self.key_label = tk.Label(self.frame, text="Key (single character):", font=("Times New Roman", 14, "bold"), fg="white", bg="darkblue")
+        self.key_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
+        self.key_entry = tk.Entry(self.frame, font=("Times New Roman", 14), fg="black", bg="white")
+        self.key_entry.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+
+        self.value_label = tk.Label(self.frame, text="Value:", font=("Times New Roman", 14, "bold"), fg="white", bg="darkblue")
+        self.value_label.grid(row=2, column=0, padx=10, pady=5, sticky="e")
+        self.value_entry = tk.Entry(self.frame, font=("Times New Roman", 14), fg="black", bg="white")
+        self.value_entry.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+
+        # Buttons for Insert, Search, Delete, and Traverse
+        self.insert_button = tk.Button(self.frame, text="Insert", font=("Times New Roman", 14), fg="black", bg="lightblue", command=self.insert)
+        self.insert_button.grid(row=3, column=0, padx=10, pady=10)
+
+        self.search_button = tk.Button(self.frame, text="Search", font=("Times New Roman", 14), fg="black", bg="lightblue", command=self.search)
+        self.search_button.grid(row=3, column=1, padx=10, pady=10)
+
+        self.delete_button = tk.Button(self.frame, text="Delete", font=("Times New Roman", 14), fg="black", bg="lightblue", command=self.delete)
+        self.delete_button.grid(row=3, column=2, padx=10, pady=10)
+
+        self.traverse_button = tk.Button(self.frame, text="Traverse", font=("Times New Roman", 14), fg="black", bg="lightblue", command=self.traverse)
+        self.traverse_button.grid(row=3, column=3, padx=10, pady=10)
+
+        # Output Text for Results
+        self.output_text = tk.Text(self.frame, height=10, width=50, font=("Times New Roman", 14), fg="navy", bg="white")
+        self.output_text.grid(row=4, column=0, columnspan=4, padx=10, pady=10)
+
+    def insert(self):
+        key = self.key_entry.get()
+        value = self.value_entry.get()
+        if len(key) != 1:
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, "Error: Key must be a single character.\n")
+            return
+        if not value:
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, "Error: Value cannot be empty.\n")
+            return
+        self.hash_table.insert(key, value)
+        self.output_text.delete(1.0, tk.END)
+        self.output_text.insert(tk.END, f"Inserted ('{key}', '{value}')\n")
+        self.clear_entries()
+
+    def search(self):
+        key = self.key_entry.get()
+        if len(key) != 1:
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, "Error: Key must be a single character.\n")
+            return
+        result = self.hash_table.search(key)
+        if result:
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, f"Value for key '{key}': {result}\n")
+        else:
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, f"Key '{key}' not found.\n")
+        self.clear_entries()
+
+    def delete(self):
+        key = self.key_entry.get()
+        if len(key) != 1:
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, "Error: Key must be a single character.\n")
+            return
+        self.hash_table.delete(key)
+        self.output_text.delete(1.0, tk.END)
+        self.output_text.insert(tk.END, f"Deleted key '{key}'\n")
+        self.clear_entries()
+
+    def traverse(self):
+        result = self.hash_table.traverse()
+        self.output_text.delete(1.0, tk.END)  # Clear previous output
+        if result:
+            for item in result:
+                self.output_text.insert(tk.END, item + "\n")
+        else:
+            self.output_text.insert(tk.END, "Hash Table is empty.\n")
+
+    def clear_entries(self):
+        """Clear the key and value input fields after an operation."""
+        self.key_entry.delete(0, tk.END)
+        self.value_entry.delete(0, tk.END)
+
+
+# Node class for linked list (for chaining)
+class Node:
+    def __init__(self, key, value):
+        """Node for the linked list used in overflow chaining."""
+        self.key = key
+        self.value = value
+        self.next = None
+
+# Hash Table class with overflow chaining
+class HashTableCollision:
+    def __init__(self, size):
+        """Initialize the hash table with a given size."""
+        self.size = size
+        self.table = [None] * size
+
+    def hash_function(self, key):
+        """Hash function to determine the index for a given key (based on ASCII value for alphabets)."""
+        return ord(key) % self.size
+
+    def insert(self, key, value):
+        """Insert a key-value pair into the hash table."""
+        index = self.hash_function(key)
+        new_node = Node(key, value)
+
+        if self.table[index] is None:
+            self.table[index] = new_node
+        else:
+            current = self.table[index]
+            while current.next:
+                current = current.next
+            current.next = new_node
+
+    def delete(self, key):
+        """Delete the value associated with the given key."""
+        index = self.hash_function(key)
+        current = self.table[index]
+        prev = None
+
+        while current:
+            if current.key == key:
+                if prev:
+                    prev.next = current.next
+                else:
+                    self.table[index] = current.next
+                return True
+            prev = current
+            current = current.next
+        return False
+
+    def search(self, key):
+        """Search for the value associated with the given key."""
+        index = self.hash_function(key)
+        current = self.table[index]
+
+        while current:
+            if current.key == key:
+                return current.value
+            current = current.next
+        return None
+
+    def traverse(self):
+        """Traverse and return all key-value pairs in the hash table."""
+        result = []
+        for index, node in enumerate(self.table):
+            current = node
+            chain = []
+            while current:
+                chain.append(f"[Key {current.key}, Value {current.value}]")
+                current = current.next
+            if chain:
+                result.append(f"Index {index}: " + " -> ".join(chain))
+        return result
+
+class HashCollisionGUI:
+    def __init__(self, master):
+        self.master = master  # Use master as the parameter
+
+        self.hash_table = HashTableCollision(size=10)  # Ensure this is the correct reference
+
+        # Frame for input and output
+        self.frame = tk.Frame(self.master, bg="dark blue")
+        self.frame.pack(fill=tk.BOTH, expand=True)
+
+        # Initialize widgets
+        self.init_widgets()
+
+    def init_widgets(self):
+        # Main label
+        self.label = tk.Label(self.frame, text="Hash Table (Collision)", font=("Times New Roman", 20, "bold"), fg="white", bg="dark blue")
+        self.label.grid(row=0, column=0, columnspan=4, pady=10)
+
+        # Key and Value Input
+        self.key_label = tk.Label(self.frame, text="Key (single alphabet):", font=("Times New Roman", 14, "bold"), fg="white", bg="dark blue")
+        self.key_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
+        self.key_entry = tk.Entry(self.frame, font=("Times New Roman", 14), fg="black", bg="lightgrey")
+        self.key_entry.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+
+        self.value_label = tk.Label(self.frame, text="Value:", font=("Times New Roman", 14, "bold"), fg="white", bg="dark blue")
+        self.value_label.grid(row=2, column=0, padx=10, pady=5, sticky="e")
+        self.value_entry = tk.Entry(self.frame, font=("Times New Roman", 14), fg="black", bg="white")
+        self.value_entry.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+
+        # Buttons for Insert, Search, Delete, and Traverse
+        self.insert_button = tk.Button(self.frame, text="Insert", font=("Times New Roman", 14), fg="black", bg="lightblue", command=self.insert)
+        self.insert_button.grid(row=1, column=2, padx=10, pady=10)
+
+        self.search_button = tk.Button(self.frame, text="Search", font=("Times New Roman", 14), fg="black", bg="lightblue", command=self.search)
+        self.search_button.grid(row=2, column=2, padx=10, pady=10)
+
+        self.delete_button = tk.Button(self.frame, text="Delete", font=("Times New Roman", 14), fg="black", bg="lightblue", command=self.delete)
+        self.delete_button.grid(row=1, column=3, padx=10, pady=10)
+
+        self.traverse_button = tk.Button(self.frame, text="Traverse", font=("Times New Roman", 14), fg="black", bg="lightblue", command=self.traverse)
+        self.traverse_button.grid(row=2, column=3, padx=10, pady=10)
+
+        # Output Text for Results
+        self.output_text = tk.Text(self.frame, height=10, width=50, font=("Times New Roman", 14), fg="black", bg="light grey")
+        self.output_text.grid(row=7, column=0, columnspan=4, padx=10, pady=10)
+
+        # Status label for messages
+        self.status_label = tk.Label(self.frame, text="", font=("Times New Roman", 14), fg="red", bg="dark blue")
+        self.status_label.grid(row=8, column=0, columnspan=4, pady=10)
+
+    def insert(self):
+        key = self.key_entry.get()
+        value = self.value_entry.get()
+        if len(key) != 1 or not key.isalpha():
+            self.status_label.config(text="Error: Key must be a single alphabet.")
+            return
+        if not value:
+            self.status_label.config(text="Error: Value cannot be empty.")
+            return
+        self.hash_table.insert(key, value)  # Ensure this method is defined
+        self.status_label.config(text=f"Success: Inserted ('{key}', '{value}')")
+        self.clear_entries()
+
+    def search(self):
+        key = self.key_entry.get()
+        if len(key) != 1 or not key.isalpha():
+            self.status_label.config(text="Error: Key must be a single alphabet.")
+            return
+        result = self.hash_table.search(key)  # Ensure this method is defined
+        if result:
+            self.status_label.config(text=f"Search Result: Value for key '{key}': {result}")
+        else:
+            self.status_label.config(text=f"Search Result: Key '{key}' not found.")
+        self.clear_entries()
+
+    def delete(self):
+        key = self.key_entry.get()
+        if len(key) != 1 or not key.isalpha():
+            self.status_label.config(text="Error: Key must be a single alphabet.")
+            return
+        success = self.hash_table.delete(key)  # Ensure this method is defined
+        if success:
+            self.status_label.config(text=f"Success: Deleted key '{key}'")
+        else:
+            self.status_label.config(text=f"Error: Key '{key}' not found.")
+        self.clear_entries()
+
+    def traverse(self):
+        result = self.hash_table.traverse()  # Ensure this method is defined
+        self.output_text.delete(1.0, tk.END)  # Clear previous output
+        if result:
+            for item in result:
+                self.output_text.insert(tk.END, item + "\n")
+        else:
+            self.output_text.insert(tk.END, "Hash Table is empty.\n")
+
+    def clear_entries(self):
+        """Clear the key and value input fields after an operation."""
+        self.key_entry.delete(0, tk.END)
+        self.value_entry.delete(0, tk.END)
+        self.status_label.config(text="")  # Clear the status label
+
+
+# Main application code
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MainApp(root)
+    root.mainloop()
