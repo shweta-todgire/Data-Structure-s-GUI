@@ -193,6 +193,7 @@ class StackGUI:
             self.stack_display.insert(tk.END, str(item) + "\n")
 
 
+##Singly linked list
 
 class SinglyNode:
     def __init__(self, data):
@@ -226,13 +227,8 @@ class SinglyLinkedList:
                 return False
         if temp is None or temp.next is None:
             return False
-        
-        # Unlink the node from the linked list
-        next = temp.next.next
-        temp.next = None
-        temp.next = next
+        temp.next = temp.next.next
         return True
-
 
     def traverse(self):
         elements = []
@@ -252,7 +248,7 @@ class LinkedListGUI:
 
         self.linked_list = SinglyLinkedList()
 
-        self.entry_label = tk.Label(master, text="Enter Element:",font=("Times New Roman", 14), bg='darkblue', fg='white')
+        self.entry_label = tk.Label(master, text="Enter Element:", font=("Times New Roman", 14), bg='darkblue', fg='white')
         self.entry_label.pack()
 
         self.entry = tk.Entry(master, font=("Times New Roman", 14), bg='lightgray', fg='black')
@@ -261,7 +257,7 @@ class LinkedListGUI:
         self.insert_button = tk.Button(master, text="Insert", command=self.insert_node, bg="lightblue", fg="black", font=("Times New Roman", 14))
         self.insert_button.pack(pady=5)
 
-        self.delete_label = tk.Label(master, text="Delete Index:",font=("Times New Roman", 14), bg='darkblue', fg='white')
+        self.delete_label = tk.Label(master, text="Delete Index:", font=("Times New Roman", 14), bg='darkblue', fg='white')
         self.delete_label.pack()
 
         self.delete_entry = tk.Entry(master, font=("Times New Roman", 14), bg='lightgray', fg='black')
@@ -273,7 +269,8 @@ class LinkedListGUI:
         self.traverse_button = tk.Button(master, text="Traverse", command=self.traverse_list, bg="lightblue", fg="black", font=("Times New Roman", 14))
         self.traverse_button.pack(pady=5)
 
-        self.output_label = tk.Label(master, text="List Contents: []", bg="darkblue", fg="white", font=("Times New Roman", 14))
+        # Label to display messages
+        self.output_label = tk.Label(master, text="", font=("Times New Roman", 14), bg='darkblue', fg='white')
         self.output_label.pack(pady=10)
 
     def insert_node(self):
@@ -281,10 +278,9 @@ class LinkedListGUI:
         if value:
             self.linked_list.insert(value)
             self.entry.delete(0, tk.END)
-            messagebox.showinfo("Success", f"Inserted {value}")
-            self.traverse_list()
+            self.output_label.config(text=f"Inserted element: {value}")
         else:
-            messagebox.showwarning("Input Error", "Please enter a value")
+            self.output_label.config(text="Input Error: Please enter a value")
 
     def delete_node(self):
         index = self.delete_entry.get()
@@ -292,16 +288,19 @@ class LinkedListGUI:
             success = self.linked_list.delete(int(index))
             if success:
                 self.delete_entry.delete(0, tk.END)
-                messagebox.showinfo("Success", f"Deleted node at index {index}")
-                self.traverse_list()
+                self.output_label.config(text=f"Deleted node at index {index}")
             else:
-                messagebox.showwarning("Error", "Invalid index or list is empty")
+                self.output_label.config(text="Error: Invalid index or list is empty")
         else:
-            messagebox.showwarning("Input Error", "Please enter a valid index")
+            self.output_label.config(text="Input Error: Please enter a valid index")
 
     def traverse_list(self):
         elements = self.linked_list.traverse()
-        self.output_label.config(text=f"List Contents: {elements}")
+        if elements:
+            self.output_label.config(text=f"List Contents: {' -> '.join(elements)}")
+        else:
+            self.output_label.config(text="List is empty.")
+        
 
 ### Doubly Linked List
 class DoublyNode:
@@ -511,8 +510,10 @@ class QueueGUI:
         size = self.size_entry.get()
         if size.isdigit() and int(size) > 0:
             self.queue.set_size(int(size))
+            self.size_entry.delete(0, tk.END)
             self.message_label.config(text="Queue size set successfully.")
         else:
+            self.entry.delete(0, tk.END)
             self.message_label.config(text="Invalid Input: Please enter a valid positive number.")
 
     def enqueue_element(self):
@@ -525,6 +526,7 @@ class QueueGUI:
                 self.update_display()
                 self.message_label.config(text=f"Enqueued: {element}")
         else:
+            self.entry.delete(0, tk.END)
             self.message_label.config(text="Please enter an element to enqueue.")
 
     def dequeue_element(self):
@@ -865,6 +867,7 @@ class BinaryTreeGUI:
             operation(value)
             self.message_area.insert(tk.END, f"{action_message} {value}\n")
             self.draw_tree()
+            self.entry.delete(0, tk.END)
         except ValueError:
             self.message_area.insert(tk.END, "Error: Please enter a valid integer.\n")
 
@@ -1119,15 +1122,12 @@ class GraphApp:
                                      font=("Times New Roman", 20, "bold"), fg="white", bg="darkblue")
         self.header_label.pack(pady=10, anchor='n')
 
-        # Create a main frame to hold left and right sections
         self.main_frame = tk.Frame(self.master, bg="darkblue")
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Left section for input controls
         self.left_frame = tk.Frame(self.main_frame, bg="darkblue")
         self.left_frame.grid(row=0, column=0, sticky="e", padx=10, pady=10)
 
-        # Right section for graph visualization
         self.right_frame = tk.Frame(self.main_frame, bg="darkblue")
         self.right_frame.grid(row=0, column=1, sticky="e", padx=10, pady=10)
 
@@ -1289,17 +1289,20 @@ class GraphApp:
         return random.randint(50, 580), random.randint(50, 480)
 
     def draw_graph(self):
-        self.draw_canvas.delete("all")
-        pos = nx.get_node_attributes(self.graph, 'pos')
-        for node, (x, y) in pos.items():
-            self.draw_canvas.create_oval(x-30, y-30, x+30, y+30, fill='light blue')
-            self.draw_canvas.create_text(x, y, text=node, fill='black')
-
+        self.draw_canvas.delete("all")  
+        pos = nx.get_node_attributes(self.graph, 'pos')  
+        # Draw edges
         for edge in self.graph.edges:
             x1, y1 = pos[edge[0]]
             x2, y2 = pos[edge[1]]
-            self.draw_canvas.create_line(x1, y1, x2, y2)
-            
+            self.draw_canvas.create_line(x1, y1, x2, y2, fill='black')
+        # Draw nodes
+        for node in self.graph.nodes:
+            x, y = pos[node]
+            size = 20
+            self.draw_canvas.create_rectangle(x - size, y - size, x + size, y + size, fill='black')
+            self.draw_canvas.create_text(x, y, text=str(node), fill='white', font=("Times New Roman", 14))
+
 class BFS:
     def __init__(self):
         self.graph = defaultdict(list)
@@ -1989,48 +1992,51 @@ class HashCollisionGUI:
         self.traverse_button.grid(row=2, column=3, padx=10, pady=10)
 
         # Output Text for Results
-        self.output_text = tk.Text(self.frame, height=10, width=50, font=("Times New Roman", 14), fg="black", bg="light grey")
+        self.output_text = tk.Text(self.frame, height=10, width=50, font=("Times New Roman", 14), fg="dark blue", bg="light grey")
         self.output_text.grid(row=7, column=0, columnspan=4, padx=10, pady=10)
-
-        # Status label for messages
-        self.status_label = tk.Label(self.frame, text="", font=("Times New Roman", 14), fg="red", bg="dark blue")
-        self.status_label.grid(row=8, column=0, columnspan=4, pady=10)
 
     def insert(self):
         key = self.key_entry.get()
         value = self.value_entry.get()
         if len(key) != 1 or not key.isalpha():
-            self.status_label.config(text="Error: Key must be a single alphabet.")
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, "Error: Key must be a single alphabet.\n")
             return
         if not value:
-            self.status_label.config(text="Error: Value cannot be empty.")
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, "Error: Value cannot be empty.\n")
             return
         self.hash_table.insert(key, value)  # Ensure this method is defined
-        self.status_label.config(text=f"Success: Inserted ('{key}', '{value}')")
+        self.output_text.delete(1.0, tk.END)
+        self.output_text.insert(tk.END, f"Success: Inserted ('{key}', '{value}')\n")
         self.clear_entries()
 
     def search(self):
         key = self.key_entry.get()
         if len(key) != 1 or not key.isalpha():
-            self.status_label.config(text="Error: Key must be a single alphabet.")
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, "Error: Key must be a single alphabet.\n")
             return
         result = self.hash_table.search(key)  # Ensure this method is defined
+        self.output_text.delete(1.0, tk.END)
         if result:
-            self.status_label.config(text=f"Search Result: Value for key '{key}': {result}")
+            self.output_text.insert(tk.END, f"Search Result: Value for key '{key}': {result}\n")
         else:
-            self.status_label.config(text=f"Search Result: Key '{key}' not found.")
+            self.output_text.insert(tk.END, f"Search Result: Key '{key}' not found.\n")
         self.clear_entries()
 
     def delete(self):
         key = self.key_entry.get()
         if len(key) != 1 or not key.isalpha():
-            self.status_label.config(text="Error: Key must be a single alphabet.")
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, "Error: Key must be a single alphabet.\n")
             return
         success = self.hash_table.delete(key)  # Ensure this method is defined
+        self.output_text.delete(1.0, tk.END)
         if success:
-            self.status_label.config(text=f"Success: Deleted key '{key}'")
+            self.output_text.insert(tk.END, f"Success: Deleted key '{key}'\n")
         else:
-            self.status_label.config(text=f"Error: Key '{key}' not found.")
+            self.output_text.insert(tk.END, f"Error: Key '{key}' not found.\n")
         self.clear_entries()
 
     def traverse(self):
@@ -2043,11 +2049,8 @@ class HashCollisionGUI:
             self.output_text.insert(tk.END, "Hash Table is empty.\n")
 
     def clear_entries(self):
-        """Clear the key and value input fields after an operation."""
         self.key_entry.delete(0, tk.END)
         self.value_entry.delete(0, tk.END)
-        self.status_label.config(text="")  # Clear the status label
-
 
 # Main application code
 if __name__ == "__main__":
